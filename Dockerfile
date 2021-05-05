@@ -15,6 +15,6 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
  && source $HOME/.cargo/env \
  && cargo install cargo-deb \
  && rustup toolchain install stable \
- && rustup default stableCMD ["cargo", "--version"]
+ && rustup default stable
 
-CMD ["cargo", "--version"] 
+CMD ["/bin/bash", "-c"] 
