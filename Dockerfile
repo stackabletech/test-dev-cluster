@@ -1,5 +1,6 @@
 FROM debian:buster
 
+# Needed to run "source" command below, which is not available in plain "sh".
 SHELL ["/bin/bash", "-c"]
 
 # Install prerequisites
@@ -16,5 +17,9 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
  && cargo install cargo-deb \
  && rustup toolchain install stable \
  && rustup default stable
+
+WORKDIR /agent-build-scripts
+
+COPY agent-build-scripts/*.sh .
 
 CMD ["/bin/bash", "-c"] 

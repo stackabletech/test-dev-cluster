@@ -1,5 +1,8 @@
 #!/bin/bash
 
-docker run --rm -i -v $HOME/dev/projects/agent/:/builddir/ stackable-dev-test /builddir/build.sh
-#docker run --rm -i -v $HOME/dev/projects/agent/:/builddir/ stackable-dev-test "cd /builddir && cargo build --verbose"
-# worked fine docker run --rm -it -v $HOME/dev/projects/agent/:/builddir/ stackable-dev-test /bin/bash
+set -x
+
+# Assume the agent repo is in the same (base) folder as us
+AGENT_SRC_DIR=$(dirname $(pwd))/agent
+
+docker run --rm -v ${AGENT_SRC_DIR}:/agent stackabletech/debian-agent-base /agent-build-scripts/build.sh
