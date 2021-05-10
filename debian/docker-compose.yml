@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  agent:
+    privileged: true
+    image: stackabletech/debian-devel-base
+    entrypoint: /sbin/init && /stackable-scripts/run-k3s.sh
+    ports:
+      - 6443:6443
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /home/razvan/repo/stackable/test-dev-cluster/stackable-scripts:/stackable-scripts
+      - /home/razvan/repo/stackable/agent:/agent
+  spark_operator:
+    image: stackabletech/debian-devel-base
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /home/razvan/repo/stackable/spark-operator:/spark-operator
+      - /home/razvan/repo/stackable/test-dev-cluster/stackable-scripts:/stackable-scripts
+    depends_on:
+      - agent
+
