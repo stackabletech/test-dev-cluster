@@ -1,4 +1,5 @@
-
+This repository contains a collection of scripts that help developers of Stackable components (agent, operators, etc.) to
+perform integration tests locally. For this purpose it sets up several Docker containers.
 
 ## Prerequisites
 
@@ -10,6 +11,10 @@
     ./build.sh [debian|centos]
 
 This builds the image stackabletech/<os-name>-devel-base.
+
+# The agent
+
+Use the scripts below to dev/test the agent.
 
 ## Test/Dev cycle
 
@@ -25,10 +30,8 @@ Start the integration tests
 
     ./run.sh [debian|centos] /root/test-agent.sh
 
-## TODO:
+# The Spark operator
 
-* Try to run the container as non-root to avoid polluting the development source tree wit root-folders wen building the software.
-* Add support for different OS versions (debian 10, 11, etc.)
-* Maybe stop the agent after the tests conclude.
-* Many more things ...
+  ./run-spark-operator.sh
 
+It sets up two containers with docker compose and actually runs the operator in one of them. No actual testing is being done currently. 
