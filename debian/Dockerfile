@@ -67,7 +67,12 @@ WORKDIR /k3s-install
 COPY k3s/k3s-install.sh .
 
 ENV INSTALL_K3S_SKIP_ENABLE=true
+#
+#  --bind-address debian_agent_1
+#     Needed because with "localhost", k3s still binds to 127.1 which is not usable in a docker swarm (compose).
+#
 RUN /k3s-install/k3s-install.sh \
+  --bind-address debian_agent_1 \
   --kube-controller-manager-arg cluster-signing-cert-file= \
   --kube-controller-manager-arg cluster-signing-key-file= \
   --kube-controller-manager-arg cluster-signing-kube-apiserver-client-cert-file=/var/lib/rancher/k3s/server/tls/client-ca.crt \

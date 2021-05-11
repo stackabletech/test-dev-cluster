@@ -6,11 +6,12 @@ services:
     image: stackabletech/debian-devel-base
     entrypoint: /sbin/init && /stackable-scripts/run-k3s.sh
     ports:
-      - 6443:6443
+      - "6443:6443"
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - /home/razvan/repo/stackable/test-dev-cluster/stackable-scripts:/stackable-scripts
       - /home/razvan/repo/stackable/agent:/agent
+      - kubeconfig:/etc/rancher/k3s
   spark_operator:
     image: stackabletech/debian-devel-base
     entrypoint: /bin/bash
@@ -20,6 +21,9 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - /home/razvan/repo/stackable/spark-operator:/spark-operator
       - /home/razvan/repo/stackable/test-dev-cluster/stackable-scripts:/stackable-scripts
+      - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
       - agent
 
+volumes:
+  kubeconfig:
