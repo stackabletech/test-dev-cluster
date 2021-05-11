@@ -8,7 +8,7 @@ SHELL ["/bin/bash", "-c"]
 #------------------------------------------------------------------------------
 RUN apt-get update \
  && apt-get install -y apt-utils \
- && apt-get install -y vim procps curl gcc make libdbus-1-dev pkg-config libdbus-1-3 liblzma-dev libssl-dev libsystemd-dev python3-pip \
+ && apt-get install -y vim procps curl gcc make pkg-config liblzma-dev libssl-dev libsystemd-dev python3-pip \
  && apt-get install -y --no-install-recommends \
         systemd      \
         systemd-sysv 
