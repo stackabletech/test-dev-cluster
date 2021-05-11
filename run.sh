@@ -2,7 +2,7 @@
 
 CONTAINER_OS_NAME=${1}
 
-if [ "$CONTAINER_OS_NAME" == "" ]; then
+if [ "$CONTAINER_OS_NAME" = "" ]; then
     CONTAINER_OS_NAME=debian
 else
     shift
