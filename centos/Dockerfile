@@ -7,7 +7,7 @@ SHELL ["/bin/bash", "-c"]
 # Install prerequisites
 #------------------------------------------------------------------------------
 RUN yum -y update \
- && yum install -y vim procps curl gcc make dbus-devel pkg-config openssl-devel systemd-devel python3-pip \
+ && yum install -y vim procps curl gcc make pkg-config openssl-devel systemd-devel python3-pip \
  container-selinux selinux-policy-base
 
 # Install required Python-Libs
