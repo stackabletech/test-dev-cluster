@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 set -x
 
@@ -19,6 +19,8 @@ docker run --privileged --rm -d --memory-swappiness 0 --name ${CONTAINER_OS_NAME
   -v ${AGENT_SRC_DIR}:/agent \
   -v ${AGENT_TEST_SRC_DIR}:/agent-integration-tests \
   stackabletech/${CONTAINER_OS_NAME}-devel-base
+
+sleep 5
 
 docker exec ${CONTAINER_OS_NAME}-agent /root/run-k3s.sh
 
