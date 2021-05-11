@@ -36,3 +36,5 @@ spec:
     - repo
 EOF
 
+exit 0
+

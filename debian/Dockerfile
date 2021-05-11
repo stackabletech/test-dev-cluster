@@ -89,8 +89,6 @@ ENV KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 #------------------------------------------------------------------------------
 WORKDIR /root
 
-COPY stackable-scripts/*.sh ./
-
 RUN mkdir -p /opt/stackable/packages \
   && mkdir -p /var/lib/stackable/stackable-agent \
   && mkdir -p /var/log/stackable/servicelogs \
