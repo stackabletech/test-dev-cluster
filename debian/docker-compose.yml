@@ -1,23 +1,34 @@
 version: "3.8"
 
 services:
+
+  k3s:
+    privileged: true
+    image: stackabletech/debian-devel-base
+    entrypoint: /sbin/init && /stackable-scripts/run-k3s.sh
+    ports:
+      - "6443:6443"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - kubeconfig:/etc/rancher/k3s
+
   agent:
     privileged: true
     image: stackabletech/debian-devel-base
-    entrypoint: /sbin/init && /stackable-scripts/run-k3s.sh && /stackable-scripts/run-agent.sh
-    ports:
-      - "6443:6443"
+    entrypoint: /sbin/init && /stackable-scripts/run-agent.sh
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts
       - ${AGENT_SRC_DIR}:/agent
       - kubeconfig:/etc/rancher/k3s
+    depends_on:
+      - k3s
+
   spark_operator:
     image: stackabletech/debian-devel-base
     entrypoint: /stackable-scripts/run-spark-operator.sh
     working_dir: /spark-operator
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - ${SPARK_OPERATOR_SRC_DIR}:/spark-operator
       - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts
       - kubeconfig:/etc/rancher/k3s:ro
@@ -26,3 +37,4 @@ services:
 
 volumes:
   kubeconfig:
+

@@ -3,6 +3,8 @@
 systemctl enable k3s
 systemctl start k3s
 
+sleep 5
+
 cat <<EOF | kubectl apply -f -
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -35,6 +37,4 @@ spec:
     shortNames:
     - repo
 EOF
-
-exit 0
 
