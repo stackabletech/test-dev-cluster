@@ -1,4 +1,5 @@
-FROM centos:8
+ARG OS_VERSION
+FROM centos:$OS_VERSION
 
 # Needed to run "source" command below, which is not available in plain "sh".
 SHELL ["/bin/bash", "-c"]

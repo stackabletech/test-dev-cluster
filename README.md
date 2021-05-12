@@ -8,7 +8,7 @@ perform integration tests locally. For this purpose it sets up several Docker co
 
 ## Debian/Centos image
 
-    ./build.sh [debian|centos]
+    ./build.sh [debian|centos7|centos8]
 
 This builds the image stackabletech/<os-name>-devel-base.
 
@@ -20,15 +20,15 @@ Use the scripts below to dev/test the agent.
 
 Start the container. This is only necessary once per test/dev session.
 
-    ./init.sh [debian|centos]
+    ./init.sh [debian|centos7|centos8]
 
 Start the agent
 
-    ./run.sh [debian|centos] /root/run-agent.sh
+    ./run.sh [debian|centos7|centos8] /root/run-agent.sh
 
 Start the integration tests
 
-    ./run.sh [debian|centos] /root/test-agent.sh
+    ./run.sh [debian|centos7|centos8] /root/test-agent.sh
 
 # The Spark operator
 
