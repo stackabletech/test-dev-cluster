@@ -8,9 +8,8 @@ SHELL ["/bin/bash", "-c"]
 # Install prerequisites
 #------------------------------------------------------------------------------
 RUN yum -y update \
- && yum install -y vim procps curl gcc make pkg-config openssl-devel systemd-devel python3-pip \
- container-selinux selinux-policy-base
-
+ && yum install -y vim procps curl gcc make pkg-config openssl-devel systemd-devel python3-pip
+ 
 # Install required Python-Libs
 RUN pip3 install PyYAML
 
@@ -57,9 +56,7 @@ WORKDIR /k3s-install
 # that doesn't try to verify for systemd.
 COPY k3s/k3s-install.sh .
 
-ENV INSTALL_K3S_SKIP_ENABLE=true \
-  INSTALL_K3S_SELINUX_WARN=true \
-  INSTALL_K3S_SKIP_SELINUX_RPM=true
+ENV INSTALL_K3S_SKIP_ENABLE=true
 RUN /k3s-install/k3s-install.sh \
   --kube-controller-manager-arg cluster-signing-cert-file= \
   --kube-controller-manager-arg cluster-signing-key-file= \
