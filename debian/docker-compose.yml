@@ -18,9 +18,9 @@ services:
     entrypoint: /sbin/init && /stackable-scripts/run-agent.sh
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts
+      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
       - ${AGENT_SRC_DIR}:/agent
-      - kubeconfig:/etc/rancher/k3s
+      - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
       - k3s
 
@@ -30,7 +30,7 @@ services:
     working_dir: /spark-operator
     volumes:
       - ${SPARK_OPERATOR_SRC_DIR}:/spark-operator
-      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts
+      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
       - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
       - agent
