@@ -854,11 +854,13 @@ eval set -- $(escape "${INSTALL_K3S_EXEC}") $(quote "$@")
 
 # --- run the install process --
 {
+    # changed by stackable
     #verify_system
     HAS_SYSTEMD=true
     setup_env "$@"
     download_and_verify
-    setup_selinux
+    # changed by stackable
+    #setup_selinux
     create_symlinks
     create_killall
     create_uninstall
