@@ -1,26 +1,31 @@
 #!/usr/bin/env sh
+#
+# Run the spark operator.
+#
 
-set -x
+set -e
 
 CONTAINER_OS_NAME=${1:-debian}
 
-# Assume the agent repo is in the same (base) folder as us
-AGENT_SRC_DIR=$(dirname $(pwd))/agent
+PARENT_DIR=$(dirname $(pwd))
 
-# Assume the agent repo is in the same (base) folder as us
-AGENT_TEST_SRC_DIR=$(dirname $(pwd))/agent-integration-tests
+write_env_file() {
+  tee .env > /dev/null <<EOF
+STACKABLE_SCRIPTS_DIR=${PARENT_DIR}/test-dev-cluster/stackable-scripts
+AGENT_SRC_DIR=${PARENT_DIR}/agent
+AGENT_TESTS_SRC_DIR=${PARENT_DIR}/agent-integration-tests
+SPARK_OPERATOR_SRC_DIR=${PARENT_DIR}/spark-operator
+EOF
+}
 
-#
-# The --priviledged flag is required for systemd to be able to start some services (like networkd)
-# in the container.
-#
-docker run --privileged --rm -d --memory-swappiness 0 --name ${CONTAINER_OS_NAME}-agent \
-  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-  -v ${AGENT_SRC_DIR}:/agent \
-  -v ${AGENT_TEST_SRC_DIR}:/agent-integration-tests \
-  stackabletech/${CONTAINER_OS_NAME}-devel-base
+compose_up() {
+  docker-compose -f ${CONTAINER_OS_NAME}/docker-compose.yml --env-file=.env up --detach --remove-orphans 
+}
 
-sleep 5
-
-docker exec ${CONTAINER_OS_NAME}-agent /root/run-k3s.sh
-
+#--------------------
+# main
+#--------------------
+{
+  write_env_file
+  compose_up
+}

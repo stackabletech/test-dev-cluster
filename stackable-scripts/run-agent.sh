@@ -4,9 +4,9 @@ set -e
 
 source ${HOME}/.cargo/env
 
-nohup /stackable-scripts/apply-spec-repository.sh > /dev/null 2>&1 &
+nohup /stackable-scripts/apply-spec-repository.sh >> /var/log/stackable/servicelogs/testmessages 2>&1 &
 
-nohup /stackable-scripts/approve-cert-request.sh > /dev/null 2>&1 &
+nohup /stackable-scripts/approve-cert-request.sh >> /var/log/stackable/servicelogs/testmessages 2>&1 &
 
 export RUST_LOG=info,stackable_agent=trace
 

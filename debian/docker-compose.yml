@@ -15,25 +15,26 @@ services:
   agent:
     privileged: true
     image: stackabletech/debian-devel-base
-    entrypoint: /sbin/init && /stackable-scripts/run-agent.sh
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
       - ${AGENT_SRC_DIR}:/agent
+      - ${AGENT_TESTS_SRC_DIR}:/agent-integration-tests
       - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
       - k3s
 
-  spark_operator:
+  operator:
+    privileged: true
     image: stackabletech/debian-devel-base
-    entrypoint: /stackable-scripts/run-spark-operator.sh
     working_dir: /spark-operator
     volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - ${SPARK_OPERATOR_SRC_DIR}:/spark-operator
       - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
       - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
-      - agent
+      - k3s
 
 volumes:
   kubeconfig:

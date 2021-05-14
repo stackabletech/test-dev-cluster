@@ -8,4 +8,4 @@ else
     shift
 fi
 
-docker exec -it ${CONTAINER_OS_NAME}-agent $@
+docker exec -it ${CONTAINER_OS_NAME}_agent_1 $@
