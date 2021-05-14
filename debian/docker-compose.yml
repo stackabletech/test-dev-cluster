@@ -27,10 +27,10 @@ services:
   operator:
     privileged: true
     image: stackabletech/debian-devel-base
-    working_dir: /spark-operator
+    working_dir: /operator
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - ${SPARK_OPERATOR_SRC_DIR}:/spark-operator
+      - ${OPERATOR_SRC_DIR}:/operator
       - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
       - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
@@ -38,4 +38,5 @@ services:
 
 volumes:
   kubeconfig:
+  dummy:
 
