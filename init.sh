@@ -54,6 +54,7 @@ write_env_file() {
   esac
 
     tee ${ENV_FILE}  > /dev/null <<EOF
+CONTAINER_OS_NAME=${CONTAINER_OS_NAME}
 STACKABLE_SCRIPTS_DIR=${STACKABLE_SCRIPTS_DIR}
 AGENT_SRC_DIR=${AGENT_SRC_DIR}
 AGENT_TESTS_SRC_DIR=${AGENT_TESTS_SRC_DIR}
@@ -64,16 +65,25 @@ EOF
 
 compose_up() {
 
+  local COMPOSE_DIR="debian"
+  if [ "${CONTAINER_OS_NAME}" != "debian" ]; then
+    COMPOSE_DIR=centos
+  fi
+
+  local COMPOSE_SERVICES="k3s"
+
   case ${COMPONENT} in
   agent)
-    docker-compose -f ${CONTAINER_OS_NAME}/docker-compose.yml --env-file=.env up --detach --remove-orphans k3s agent
+    COMPOSE_SERVICES="${COMPOSE_SERVICES} agent"
     ;;
   spark-operator)
-    docker-compose -f ${CONTAINER_OS_NAME}/docker-compose.yml --env-file=.env up --detach --remove-orphans k3s agent operator
+    COMPOSE_SERVICES="${COMPOSE_SERVICES} agent operator"
     ;;
   *)
     fatal "Unknown component: ${COMPONENT}. Valid values are: agent, spark-operator, zookeeper-operator"
   esac
+
+  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_SERVICES}
 }
 
 #--------------------

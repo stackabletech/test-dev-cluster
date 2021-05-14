@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+
+  k3s:
+    privileged: true
+    image: stackabletech/${CONTAINER_OS_NAME}-devel-base
+    entrypoint: /usr/sbin/init && /stackable-scripts/run-k3s.sh
+    ports:
+      - "6443:6443"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - kubeconfig:/etc/rancher/k3s
+
+  agent:
+    privileged: true
+    image: stackabletech/${CONTAINER_OS_NAME}-devel-base
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
+      - ${AGENT_SRC_DIR}:/agent
+      - ${AGENT_TESTS_SRC_DIR}:/agent-integration-tests
+      - kubeconfig:/etc/rancher/k3s:ro
+    depends_on:
+      - k3s
+
+  operator:
+    privileged: true
+    image: stackabletech/${CONTAINER_OS_NAME}-devel-base
+    working_dir: /operator
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - ${OPERATOR_SRC_DIR}:/operator
+      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
+      - kubeconfig:/etc/rancher/k3s:ro
+    depends_on:
+      - k3s
+
+volumes:
+  kubeconfig:
+  dummy:
+

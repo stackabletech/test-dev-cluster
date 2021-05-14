@@ -2,7 +2,12 @@
 
 CONTAINER_OS_NAME=${1:-debian}
 
-docker-compose -f ${CONTAINER_OS_NAME}/docker-compose.yml --env-file=.env down --volumes
+COMPOSE_DIR="debian"
+if [ "${CONTAINER_OS_NAME}" != "debian" ]; then
+  COMPOSE_DIR=centos
+fi
+
+docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env down --volumes
 
 rm .env
 
