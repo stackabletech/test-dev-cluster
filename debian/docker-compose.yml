@@ -20,6 +20,8 @@ services:
   agent:
     privileged: true
     image: stackabletech/debian-devel-base
+    container_name: agent
+    working_dir: /agent
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
@@ -32,6 +34,7 @@ services:
   operator:
     privileged: true
     image: stackabletech/debian-devel-base
+    container_name: operator
     working_dir: /operator
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro

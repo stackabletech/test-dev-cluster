@@ -1,9 +1,14 @@
 #!/usr/bin/env sh
 
-CONTAINER_OS_NAME=${1}
-#COMPONENT_NAME=${2}
+COMMAND=${1}
 
-{
-  shift;# shift;
-  docker exec -it ${CONTAINER_OS_NAME}_agent_1 $@
-}
+case ${COMMAND} in
+run-agent)
+  docker exec -t agent /stackable-scripts/run-agent.sh
+  ;;
+test-agent)
+  docker exec -t agent /stackable-scripts/test-agent.sh
+  ;;
+*)
+  echo ERROR: Unkown command.
+esac
