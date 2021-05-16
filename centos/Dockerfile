@@ -36,12 +36,12 @@ RUN rm -f           \
 #------------------------------------------------------------------------------
 # Install Rust
 #------------------------------------------------------------------------------
-#WORKDIR /root
-#
-#RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
-# && source $HOME/.cargo/env \
-# && rustup toolchain install stable \
-# && rustup default stable
+WORKDIR /root
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+ && source $HOME/.cargo/env \
+ && rustup toolchain install stable \
+ && rustup default stable
 
 
 #------------------------------------------------------------------------------
@@ -56,17 +56,9 @@ COPY k3s/k3s-install.sh .
 ENV INSTALL_K3S_SKIP_ENABLE=true \
   INSTALL_K3S_SKIP_START=true
 
-RUN /k3s-install/k3s-install.sh \
-  --bind-address centos_k3s_1 \
-  --kube-controller-manager-arg cluster-signing-cert-file= \
-  --kube-controller-manager-arg cluster-signing-key-file= \
-  --kube-controller-manager-arg cluster-signing-kube-apiserver-client-cert-file=/var/lib/rancher/k3s/server/tls/client-ca.crt \
-  --kube-controller-manager-arg cluster-signing-kube-apiserver-client-key-file=/var/lib/rancher/k3s/server/tls/client-ca.key \
-  --kube-controller-manager-arg cluster-signing-kubelet-client-cert-file=/var/lib/rancher/k3s/server/tls/client-ca.crt \
-  --kube-controller-manager-arg cluster-signing-kubelet-client-key-file=/var/lib/rancher/k3s/server/tls/client-ca.key \
-  --kube-controller-manager-arg cluster-signing-kubelet-serving-cert-file=/var/lib/rancher/k3s/server/tls/server-ca.crt \
-  --kube-controller-manager-arg cluster-signing-kubelet-serving-key-file=/var/lib/rancher/k3s/server/tls/server-ca.key
+RUN /k3s-install/k3s-install.sh 
 
+ENV KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 #------------------------------------------------------------------------------
 # Install Stackable scripts

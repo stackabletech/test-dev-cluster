@@ -40,8 +40,9 @@ write_env_file() {
   local OPERATOR_SRC_DIR=dummy
 
   case ${COMPONENT} in
+  k3s)
+    ;;
   agent)
-
     ;;
   spark-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/spark-operator
@@ -73,6 +74,8 @@ compose_up() {
   local COMPOSE_SERVICES="k3s"
 
   case ${COMPONENT} in
+  k3s)
+    ;;
   agent)
     COMPOSE_SERVICES="${COMPOSE_SERVICES} agent"
     ;;
@@ -82,8 +85,9 @@ compose_up() {
   *)
     fatal "Unknown component: ${COMPONENT}. Valid values are: agent, spark-operator, zookeeper-operator"
   esac
-
+  set -x
   docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_SERVICES}
+  set +x
 }
 
 #--------------------

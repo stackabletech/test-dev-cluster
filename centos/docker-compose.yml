@@ -4,13 +4,18 @@ services:
 
   k3s:
     privileged: true
-    image: stackabletech/${CONTAINER_OS_NAME}-devel-base
-    entrypoint: /usr/sbin/init && /stackable-scripts/run-k3s.sh
+    image: stackabletech/k3s
+    container_name: k3s
+    entrypoint: /sbin/init && /stackable-scripts/run-k3s.sh
     ports:
       - "6443:6443"
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - kubeconfig:/etc/rancher/k3s
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
 
   agent:
     privileged: true
