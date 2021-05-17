@@ -43,7 +43,7 @@ Start the integration tests
     ./run.sh test-agent
 
 
-# Cleanup
+# Teardown
 
   ./clean.sh [debian|centos7|centos8]
 
@@ -52,5 +52,4 @@ Stops containers and deletes temporary files.
 ## Known issues
 
 * None of this stuff works on fedora 34 because of issues related to `cgroups v2`. 
-* Do not run `init.sh` in a terminal multiplexer (tmux or screen) because this interferes with systemd in the container.
 
