@@ -22,8 +22,6 @@ with running k3s in centos containers OOTB.
 
 This builds the image `stackabletech/<os-name>-devel-base`.
 
-`k3s` ist installed in this image solely for the purpose of having a working kubectl available.
-
 # The agent
 
 Use the scripts below to dev/test the agent.
@@ -32,7 +30,7 @@ Use the scripts below to dev/test the agent.
 
 Start the container. This is only necessary once per test/dev session.
 
-    ./init.sh [debian|centos7|centos8] agent
+    ./init.sh [debian|centos7|centos8]
 
 Start the agent
 
@@ -42,6 +40,17 @@ Start the integration tests
 
     ./run.sh test-agent
 
+# The XXX operator
+
+Here XXX can be replaced in the future with spark, zookeeper, etc.
+
+Start the cluster:
+
+    ./init.sh [debian|centos7|centos8] xxx-operator
+
+Start the integration tests
+
+    ./run.sh test-xxx-operator
 
 # Teardown
 
