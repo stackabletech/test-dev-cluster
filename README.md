@@ -3,7 +3,7 @@ perform integration tests locally. For this purpose it sets up several Docker co
 
 ## Prerequisites
 
-* All Stackable repos are checked out under the same root.
+* All Stackable repos that are to be tested are checked out under the same root.
 * The host (development) machine has /sys/fs/cgroups
 * Use docker version >= 20 and docker-compose version >= 1.29
 
@@ -13,7 +13,7 @@ perform integration tests locally. For this purpose it sets up several Docker co
 
 This builds `stackabletech/k3s`.
 
-The kubernetes control plane has it's own image based on debian. This is because there are far too many issues
+The kubernetes control plane has its own image based on debian. This is because there are far too many issues
 with running k3s in centos containers OOTB.
 
 ## Debian/Centos image
