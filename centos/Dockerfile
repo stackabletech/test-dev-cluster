@@ -1,18 +1,14 @@
 ARG OS_VERSION
 FROM centos:$OS_VERSION
 
-# Needed to run "source" command below, which is not available in plain "sh".
-SHELL ["/bin/bash", "-c"]
+COPY centos/kubernetes.repo  /etc/yum.repos.d/kubernetes.repo
 
 #------------------------------------------------------------------------------
 # Install prerequisites
 #------------------------------------------------------------------------------
 RUN yum -y update \
- && yum install -y vim procps curl gcc make pkg-config openssl-devel systemd-devel python3-pip
+ && yum install -y curl gcc make pkg-config openssl-devel systemd-devel kubectl
  
-# Install required Python-Libs
-RUN pip3 install PyYAML
-
 #------------------------------------------------------------------------------
 # Configure systemd.
 #------------------------------------------------------------------------------
@@ -42,39 +38,19 @@ RUN rm -f           \
 WORKDIR /root
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
- && source $HOME/.cargo/env \
+ && . $HOME/.cargo/env \
  && rustup toolchain install stable \
  && rustup default stable
 
 
 #------------------------------------------------------------------------------
-# Install k3s
+# Set KUBECONFIG
 #------------------------------------------------------------------------------
-WORKDIR /k3s-install
-
-# A slightly modified version of the official script available at https://get.k3s.io
-# that doesn't try to verify for systemd.
-COPY k3s/k3s-install.sh .
-
-ENV INSTALL_K3S_SKIP_ENABLE=true
-RUN /k3s-install/k3s-install.sh \
-  --kube-controller-manager-arg cluster-signing-cert-file= \
-  --kube-controller-manager-arg cluster-signing-key-file= \
-  --kube-controller-manager-arg cluster-signing-kube-apiserver-client-cert-file=/var/lib/rancher/k3s/server/tls/client-ca.crt \
-  --kube-controller-manager-arg cluster-signing-kube-apiserver-client-key-file=/var/lib/rancher/k3s/server/tls/client-ca.key \
-  --kube-controller-manager-arg cluster-signing-kubelet-client-cert-file=/var/lib/rancher/k3s/server/tls/client-ca.crt \
-  --kube-controller-manager-arg cluster-signing-kubelet-client-key-file=/var/lib/rancher/k3s/server/tls/client-ca.key \
-  --kube-controller-manager-arg cluster-signing-kubelet-serving-cert-file=/var/lib/rancher/k3s/server/tls/server-ca.crt \
-  --kube-controller-manager-arg cluster-signing-kubelet-serving-key-file=/var/lib/rancher/k3s/server/tls/server-ca.key
-
 ENV KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
 #------------------------------------------------------------------------------
 # Install Stackable scripts
 #------------------------------------------------------------------------------
-WORKDIR /root
-
-COPY stackable-scripts/*.sh ./
 
 RUN mkdir -p /opt/stackable/packages \
   && mkdir -p /var/lib/stackable/stackable-agent \

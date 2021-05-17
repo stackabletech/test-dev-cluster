@@ -1,11 +1,14 @@
 #!/usr/bin/env sh
 
-CONTAINER_OS_NAME=${1}
+COMMAND=${1}
 
-if [ "$CONTAINER_OS_NAME" = "" ]; then
-    CONTAINER_OS_NAME=debian
-else
-    shift
-fi
-
-docker exec -it ${CONTAINER_OS_NAME}-agent $@
+case ${COMMAND} in
+run-agent)
+  docker exec -t agent /stackable-scripts/run-agent.sh
+  ;;
+test-agent)
+  docker exec -t agent /stackable-scripts/test-agent.sh
+  ;;
+*)
+  echo ERROR: Unkown command.
+esac
