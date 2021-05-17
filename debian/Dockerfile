@@ -42,10 +42,20 @@ RUN rm -f           \
     /etc/machine-id \
     /var/lib/dbus/machine-id
 
+RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/sysinit.target.wants/systemd-tmpfiles-setup* \
+    /lib/systemd/system/systemd-update-utmp*
+
 #------------------------------------------------------------------------------
 # Install Rust
 #------------------------------------------------------------------------------
-WORKDIR /root
+#RUN useradd -ms /bin/bash stackable
+#USER stackable:stackable
+#WORKDIR /home/stackable
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
  && source $HOME/.cargo/env \
@@ -53,6 +63,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
  && rustup toolchain install stable \
  && rustup default stable
 
+#USER root
 
 #------------------------------------------------------------------------------
 # Install k3s
@@ -72,8 +83,6 @@ ENV KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 #------------------------------------------------------------------------------
 # Install Stackable scripts
 #------------------------------------------------------------------------------
-WORKDIR /root
-
 RUN mkdir -p /opt/stackable/packages \
   && mkdir -p /var/lib/stackable/stackable-agent \
   && mkdir -p /var/log/stackable/servicelogs \
@@ -81,4 +90,7 @@ RUN mkdir -p /opt/stackable/packages \
   && mkdir -m 700 /etc/stackable/stackable-agent/secret
 
 CMD ["/sbin/init"] 
+
+
+
 
