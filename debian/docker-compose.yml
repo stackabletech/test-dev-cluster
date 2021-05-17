@@ -14,10 +14,6 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - kubeconfig:/etc/rancher/k3s
-    tmpfs:
-      - /run
-      - /run/lock
-      - /tmp
 
   agent:
     privileged: true
@@ -32,11 +28,6 @@ services:
       - ${AGENT_SRC_DIR}:/agent
       - ${AGENT_TESTS_SRC_DIR}:/agent-integration-tests
       - kubeconfig:/etc/rancher/k3s:ro
-    tmpfs:
-      - /run
-      - /run/lock
-      - /tmp
-
     depends_on:
       - k3s
 
