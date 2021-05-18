@@ -11,7 +11,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y \
  apt-utils procps curl build-essential pkg-config liblzma-dev libssl-dev libsystemd-dev \
-  systemd systemd-sysv apt-transport-https ca-certificates 
+ systemd systemd-sysv apt-transport-https ca-certificates vim
 
 #------------------------------------------------------------------------------
 # Add K8S repository for kubectl
@@ -82,14 +82,6 @@ ENV KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 # Configure K8S repo
 #------------------------------------------------------------------------------
 ENV KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-#------------------------------------------------------------------------------
-# Install Stackable scripts
-#------------------------------------------------------------------------------
-RUN mkdir -p /opt/stackable/packages \
-  && mkdir -p /var/lib/stackable/stackable-agent \
-  && mkdir -p /var/log/stackable/servicelogs \
-  && mkdir -p /etc/stackable/stackable-agent \
-  && mkdir -m 700 /etc/stackable/stackable-agent/secret
 
 CMD ["/sbin/init"] 
 

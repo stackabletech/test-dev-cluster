@@ -7,7 +7,7 @@ COPY centos/kubernetes.repo  /etc/yum.repos.d/kubernetes.repo
 # Install prerequisites
 #------------------------------------------------------------------------------
 RUN yum -y update \
- && yum install -y curl gcc make pkg-config openssl-devel systemd-devel kubectl
+ && yum install -y curl gcc make pkg-config openssl-devel systemd-devel kubectl vim
  
 #------------------------------------------------------------------------------
 # Configure systemd.
@@ -47,16 +47,6 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
 # Set KUBECONFIG
 #------------------------------------------------------------------------------
 ENV KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-
-#------------------------------------------------------------------------------
-# Install Stackable scripts
-#------------------------------------------------------------------------------
-
-RUN mkdir -p /opt/stackable/packages \
-  && mkdir -p /var/lib/stackable/stackable-agent \
-  && mkdir -p /var/log/stackable/servicelogs \
-  && mkdir -p /etc/stackable/stackable-agent \
-  && mkdir -m 700 /etc/stackable/stackable-agent/secret
 
 CMD ["/usr/sbin/init"] 
 

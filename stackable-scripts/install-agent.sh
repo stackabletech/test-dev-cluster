@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -e
+
+[ -d /var/log/stackable/servicelogs ] || mkdir -p /var/log/stackable/servicelogs
+exec >> /var/log/stackable/servicelogs/testmessages
+exec 2>&1
+
+install_agent_package() {
+
+  [ -f /etc/os-release ] && . /etc/os-release
+
+  case $ID in
+    debian)
+      apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 16dd12f5c7a6d76a
+      echo deb https://repo.stackable.tech/repository/deb-nightly buster main | tee  /etc/apt/sources.list.d/stackable.list
+      apt-get update && apt-get install -y stackable-agent
+      ;;
+    centos)
+      # TODO (also update the documentation at https://docs.stackable.tech/home/index.html if necessary)
+      ;;
+    *)
+      echo [ERROR] Don\'t know how to install the stackable agent on this system.
+      exit 1
+      ;;
+  esac
+}
+
+install_service_environment() {
+  #--------------------
+  # Add KUBECONFIG to the service environment
+  #--------------------
+  [ -d /etc/systemd/system/stackable-agent.service.d ] || mkdir -p /etc/systemd/system/stackable-agent.service.d
+
+  tee /etc/systemd/system/stackable-agent.service.d/override.conf > /dev/null <<EOF
+[Service]
+Environment="KUBECONFIG=/etc/rancher/k3s/k3s.yaml"
+EOF
+}
+
+#--------------------
+# main
+#--------------------
+{
+  install_agent_package
+  install_service_environment
+nohup /stackable-scripts/apply-spec-repository.sh &
+nohup /stackable-scripts/approve-cert-request.sh &
+  systemctl start stackable-agent
+}
+

@@ -23,7 +23,7 @@ info()
 warn()
 {
     echo '[WARN] ' "$@" >&2
-}
+  }
 fatal()
 {
     echo '[ERROR] ' "$@" >&2
@@ -35,14 +35,16 @@ write_env_file() {
   local ENV_FILE=.env
 
   local STACKABLE_SCRIPTS_DIR=${PARENT_DIR}/test-dev-cluster/stackable-scripts
-  local AGENT_SRC_DIR=${PARENT_DIR}/agent
-  local AGENT_TESTS_SRC_DIR=${PARENT_DIR}/agent-integration-tests
+  local AGENT_SRC_DIR=dummy
+  local AGENT_TESTS_SRC_DIR=dummy
   local OPERATOR_SRC_DIR=dummy
 
   case ${COMPONENT} in
   k3s)
     ;;
   agent)
+    AGENT_SRC_DIR=${PARENT_DIR}/agent
+    AGENT_TESTS_SRC_DIR=${PARENT_DIR}/agent-integration-tests
     ;;
   spark-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/spark-operator
@@ -74,10 +76,17 @@ compose_up() {
   docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans 
 }
 
+maybe_install_agent() {
+  if [ "$COMPONENT" != "agent" ]; then
+    docker exec -t agent /stackable-scripts/install-agent.sh
+  fi
+}
+
 #--------------------
 # main
 #--------------------
 {
   write_env_file
   compose_up
+  maybe_install_agent
 }
