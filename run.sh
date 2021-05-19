@@ -12,6 +12,9 @@ test-agent)
 run-operator)
   docker exec -t operator /stackable-scripts/run-operator.sh
   ;;
+test-operator)
+  docker exec -t operator /stackable-scripts/test-operator.sh
+  ;;
 *)
   echo ERROR: Unkown command.
 esac
