@@ -17,7 +17,9 @@ install_agent_package() {
       apt-get update && apt-get install -y stackable-agent
       ;;
     centos)
-      # TODO (also update the documentation at https://docs.stackable.tech/home/index.html if necessary)
+      # TODO: maybe add the gpg key here too
+      yum-config-manager --add-repo=https://repo.stackable.tech/repository/rpm-release/el${VERSION}/
+      yum update && yum install -y stackable-agent --nogpgcheck
       ;;
     *)
       echo [ERROR] Don\'t know how to install the stackable agent on this system.

@@ -7,7 +7,7 @@ COPY centos/kubernetes.repo  /etc/yum.repos.d/kubernetes.repo
 # Install prerequisites
 #------------------------------------------------------------------------------
 RUN yum -y update \
- && yum install -y curl gcc make pkg-config openssl-devel systemd-devel kubectl vim
+ && yum install -y yum-utils curl gcc make pkg-config openssl-devel systemd-devel kubectl vim
  
 #------------------------------------------------------------------------------
 # Configure systemd.

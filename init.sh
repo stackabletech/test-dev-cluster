@@ -38,6 +38,7 @@ write_env_file() {
   local AGENT_SRC_DIR=dummy
   local AGENT_TESTS_SRC_DIR=dummy
   local OPERATOR_SRC_DIR=dummy
+  local OPERATOR_TESTS_SRC_DIR=dummy
 
   case ${COMPONENT} in
   k3s)
@@ -51,6 +52,7 @@ write_env_file() {
     ;;
   zookeeper-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/zookeeper-operator
+    OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/zookeeper-operator-integration-tests
     ;;
    *)
     fatal "Unknown component: ${COMPONENT}. Valid values are: agent, spark-operator, zookeeper-operator"
@@ -62,6 +64,7 @@ STACKABLE_SCRIPTS_DIR=${STACKABLE_SCRIPTS_DIR}
 AGENT_SRC_DIR=${AGENT_SRC_DIR}
 AGENT_TESTS_SRC_DIR=${AGENT_TESTS_SRC_DIR}
 OPERATOR_SRC_DIR=${OPERATOR_SRC_DIR}
+OPERATOR_TESTS_SRC_DIR=${OPERATOR_TESTS_SRC_DIR}
 COMPONENT=${COMPONENT}
 EOF
 
