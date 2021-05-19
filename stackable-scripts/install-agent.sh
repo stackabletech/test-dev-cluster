@@ -13,7 +13,7 @@ install_agent_package() {
   case $ID in
     debian)
       apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 16dd12f5c7a6d76a
-      echo deb https://repo.stackable.tech/repository/deb-nightly buster main | tee  /etc/apt/sources.list.d/stackable.list
+      echo deb https://repo.stackable.tech/repository/deb-release buster main | tee  /etc/apt/sources.list.d/stackable.list
       apt-get update && apt-get install -y stackable-agent
       ;;
     centos)
