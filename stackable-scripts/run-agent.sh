@@ -2,9 +2,9 @@
 
 set -e
 
-[ -d /var/log/stackable/servicelogs ] || mkdir -p /var/log/stackable/servicelogs
-exec >> /var/log/stackable/servicelogs/testmessages
-exec 2>&1
+#[ -d /var/log/stackable/servicelogs ] || mkdir -p /var/log/stackable/servicelogs
+#exec >> /var/log/stackable/servicelogs/testmessages
+#exec 2>&1
 
 source ${HOME}/.cargo/env
 
