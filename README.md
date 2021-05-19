@@ -7,20 +7,24 @@ perform integration tests locally. For this purpose it sets up several Docker co
 * The host (development) machine has /sys/fs/cgroups
 * Use docker version >= 20 and docker-compose version >= 1.29
 
-## K3S image
+## Docker images
+
+The required Docker images can be built using the script described in this section. As we host a `latest` version (built from the *main* branch) in our Docker repository, you might skip the building of the images if you do not require an individually built version.
+
+### K3S image
 
     ./build.sh k3s
 
-This builds `stackabletech/k3s`.
+This builds `docker.stackable.tech/k3s`.
 
 The kubernetes control plane has its own image based on debian. This is because there are far too many issues
 with running k3s in centos containers OOTB.
 
-## Debian/Centos image
+### Debian/Centos image
 
     ./build.sh [debian|centos7|centos8]
 
-This builds the image `stackabletech/<os-name>-devel-base`.
+This builds the image `docker.stackable.tech/<os-name>-devel-base`.
 
 # The agent
 
