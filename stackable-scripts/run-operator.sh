@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -e
+
+#[ -d /var/log/stackable/servicelogs ] || mkdir -p /var/log/stackable/servicelogs
+#exec >> /var/log/stackable/servicelogs/testmessages
+#exec 2>&1
+
+source ${HOME}/.cargo/env
+
+RUST_LOG=info
+COMPONENT=$(pwd | sed 's/^\///')
+
+OPERATOR_BIN_NAME=stackable-$COMPONENT-server
+
+# kill the operator if it's already running
+OPERATOR_PID=$(ps -u | grep ${OPERATOR_BIN_NAME} | grep -v grep | awk '{print $2}')
+if [ "${OPERATOR_PID}" != "" ]; then
+  kill -term ${OPERATOR_PID}
+fi
+
+cargo run --verbose --target-dir /build/operator --bin ${OPERATOR_BIN_NAME}
+

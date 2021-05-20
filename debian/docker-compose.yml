@@ -35,12 +35,13 @@ services:
     privileged: true
     image: stackabletech/debian-devel-base
     container_name: operator
-    working_dir: /operator
+    working_dir: /${COMPONENT}
     tty: false
     stdin_open: false
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - ${OPERATOR_SRC_DIR}:/operator
+      - ${OPERATOR_SRC_DIR}:/${COMPONENT}
+      - ${OPERATOR_TESTS_SRC_DIR}:/${COMPONENT}-integration-tests
       - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
       - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
