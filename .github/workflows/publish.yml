@@ -1,36 +1,70 @@
-# This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Docker publish
 
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+  k3s:
+
+    runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - uses: docker/login-action@v1
+        with:
+          registry: docker.stackable.tech
+          username: github
+          password: ${{ secrets.NEXUS_PASSWORD }}
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - uses: docker/build-push-action@v2.4.0
+        with:
+          file: k3s/Dockerfile
+          tags: docker.stackable.tech/k3s:latest
+          push: true
+
+  debian:
+
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: docker/login-action@v1
+        with:
+          registry: docker.stackable.tech
+          username: github
+          password: ${{ secrets.NEXUS_PASSWORD }}
+
+      - uses: docker/build-push-action@v2.4.0
+        with:
+          file: debian/Dockerfile
+          tags: docker.stackable.tech/debian-devel-base:latest
+          push: true
+
+  centos:
+    strategy:
+      matrix:
+        os_version: [ 7, 8 ]
+
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: docker/login-action@v1
+        with:
+          registry: docker.stackable.tech
+          username: github
+          password: ${{ secrets.NEXUS_PASSWORD }}
+
+      - uses: docker/build-push-action@v2.4.0
+        with:
+          file: centos/Dockerfile
+          build-args: OS_VERSION=${{ matrix.os_version }}
+          tags: docker.stackable.tech/centos${{ matrix.os_version }}-devel-base:latest
+          push: true

@@ -4,7 +4,7 @@ services:
 
   k3s:
     privileged: true
-    image: stackabletech/k3s
+    image: docker.stackable.tech/k3s
     container_name: k3s
     entrypoint: /sbin/init && /stackable-scripts/run-k3s.sh
     tty: false
@@ -17,7 +17,7 @@ services:
 
   agent:
     privileged: true
-    image: stackabletech/debian-devel-base
+    image: docker.stackable.tech/debian-devel-base
     container_name: agent
     working_dir: /agent
     tty: false
@@ -33,7 +33,7 @@ services:
 
   operator:
     privileged: true
-    image: stackabletech/debian-devel-base
+    image: docker.stackable.tech/debian-devel-base
     container_name: operator
     working_dir: /${COMPONENT}
     tty: false
