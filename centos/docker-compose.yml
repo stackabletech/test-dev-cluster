@@ -14,6 +14,7 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - kubeconfig:/etc/rancher/k3s
+      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
 
   agent:
     privileged: true

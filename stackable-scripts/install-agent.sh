@@ -42,23 +42,12 @@ Environment="KUBECONFIG=/etc/rancher/k3s/k3s.yaml"
 EOF
 }
 
-wait_for_k3s() {
-  until kubectl get crds; do
-    >&2 echo "k3s is not running yet."
-    sleep 1
-  done
-}
-
 #--------------------
 # main
 #--------------------
 {
   install_agent_package
   install_service_environment
-  wait_for_k3s
-/stackable-scripts/apply-spec-repository.sh
-/stackable-scripts/apply-cr-repository.sh
-nohup /stackable-scripts/approve-cert-request.sh &
   systemctl start stackable-agent
 }
 
