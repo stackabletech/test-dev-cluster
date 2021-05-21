@@ -48,7 +48,8 @@ EOF
 {
   install_agent_package
   install_service_environment
-nohup /stackable-scripts/apply-spec-repository.sh &
+/stackable-scripts/apply-spec-repository.sh
+/stackable-scripts/apply-cr-repository.sh
 nohup /stackable-scripts/approve-cert-request.sh &
   systemctl start stackable-agent
 }
