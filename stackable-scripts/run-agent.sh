@@ -8,9 +8,9 @@ set -e
 
 source ${HOME}/.cargo/env
 
-nohup /stackable-scripts/apply-spec-repository.sh
+nohup /stackable-scripts/apply-spec-repository.sh &
 
-nohup /stackable-scripts/approve-cert-request.sh
+nohup /stackable-scripts/approve-cert-request.sh &
 
 export RUST_LOG=info,stackable_agent=trace
 
