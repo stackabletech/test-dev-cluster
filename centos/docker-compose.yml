@@ -19,7 +19,6 @@ services:
   agent:
     privileged: true
     image: docker.stackable.tech/${CONTAINER_OS_NAME}-devel-base
-    container_name: agent
     working_dir: /agent
     tty: false
     stdin_open: false

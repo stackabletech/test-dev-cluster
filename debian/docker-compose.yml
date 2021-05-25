@@ -19,7 +19,6 @@ services:
   agent:
     privileged: true
     image: docker.stackable.tech/debian-devel-base
-      #container_name: agent
     deploy:
       replicas: 1
     working_dir: /agent
