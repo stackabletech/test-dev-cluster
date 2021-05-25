@@ -1,12 +1,22 @@
 #!/bin/bash
+#
+# Wait a given amount of time (default 10 seconds) to approve certificate signing requests
+#
+# Usage:
+#
+# approve-cert-request.sh [time-to-leave-in-seconds]
+#
+set -e
 
-while true; do
-  CERT_SIGN_REQUEST=$(kubectl get certificatesigningrequests | grep -i pending | awk '{print $1}')
-  if [ "${CERT_SIGN_REQUEST}" != "" ]; then
+TTL_SECONDS=${1:-10}
+
+SLEEP_SECONDS=2
+LOOP_COUNT=$(($TTL_SECONDS / $SLEEP_SECONDS))
+
+for i in $(seq 1 ${LOOP_COUNT}); do
+  sleep ${SLEEP_SECONDS}
+  for CERT_SIGN_REQUEST in $(kubectl get certificatesigningrequests | awk '/Pending/ {print $1}'); do
     kubectl certificate approve ${CERT_SIGN_REQUEST}
-    exit 0
-  else
-    sleep 5
-  fi
+  done
 done
 

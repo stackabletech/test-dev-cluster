@@ -2,12 +2,17 @@
 
 COMMAND=${1}
 
+agent_container_name() {
+  docker ps | awk '/agent/ {print $NF}'
+}
+
+{
 case ${COMMAND} in
 run-agent)
-  docker exec -t agent /stackable-scripts/run-agent.sh
+  docker exec -t $(agent_container_name) /stackable-scripts/run-agent.sh
   ;;
 test-agent)
-  docker exec -t agent /stackable-scripts/test-agent.sh $@
+  docker exec -t $(agent_container_name) /stackable-scripts/test-agent.sh $@
   ;;
 run-operator)
   docker exec -t operator /stackable-scripts/run-operator.sh
@@ -18,3 +23,4 @@ test-operator)
 *)
   echo ERROR: Unkown command.
 esac
+}
