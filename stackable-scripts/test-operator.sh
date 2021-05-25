@@ -11,6 +11,7 @@ cd /${COMPONENT}-integration-tests
 # --test-treads=1 is required to prevent the suite from failing on the first run.
 cargo test --target-dir /build/${COMPONENT}-integration-tests -- --nocapture --test-threads=1 $@
 
+
 # TODO: maybe this is not wanted. Leave it to the devloper to decide.
 # kill the operator to prepare for possible code changes.
 # OPERATOR_BIN_NAME=stackable-$COMPONENT-server
@@ -18,5 +19,4 @@ cargo test --target-dir /build/${COMPONENT}-integration-tests -- --nocapture --t
 # if [ "${OPERATOR_PID}" != "" ]; then
 #   kill -term ${OPERATOR_PID}
 # fi
-
 
