@@ -11,7 +11,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y \
  apt-utils procps curl build-essential pkg-config liblzma-dev libssl-dev libsystemd-dev \
- systemd systemd-sysv apt-transport-https ca-certificates vim
+ systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre
 
 #------------------------------------------------------------------------------
 # Add K8S repository for kubectl
