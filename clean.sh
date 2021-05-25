@@ -2,10 +2,18 @@
 
 CONTAINER_OS_NAME=${1:-debian}
 
-COMPOSE_DIR="debian"
-if [ "${CONTAINER_OS_NAME}" != "debian" ]; then
-  COMPOSE_DIR=centos
-fi
+case "${CONTAINER_OS_NAME}" in
+  debian)
+    COMPOSE_DIR="debian"
+  ;;
+  centos*)
+    COMPOSE_DIR="centos"
+  ;;
+  *)
+    >&2 echo Invalid container os name: ${CONTAINER_OS_NAME}
+    exit 1
+  ;;
+esac
 
 docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env down --volumes
 

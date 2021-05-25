@@ -10,3 +10,11 @@ cd /agent-integration-tests
 # This is due to a bug in k3s.
 cargo test --target-dir /build/agent-integration-tests -- --nocapture --test-threads=1 $@
 
+# kill the agent to prepare for possible code changes
+AGENT_BIN_NAME=stackable-agent
+AGENT_PID=$(ps -u | grep ${AGENT_BIN_NAME} | grep -v grep | awk '{print $2}')
+if [ "${AGENT_PID}" != "" ]; then
+  kill -term ${AGENT_PID}
+fi
+
+
