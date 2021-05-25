@@ -4,31 +4,25 @@
 #
 # Usage:
 #
-#   ./init.sh [debian|centos7|centos8] [agent|spark-operator|zookeeper-operator]
+#   ./init.sh [debian|centos7|centos8] [agent|spark-operator|zookeeper-operator] [additional args for docker-compose]
 #
-
+# Examples:
+#
+# Initialize the cluster for testing the zookeeper-operator with 3 kubelets:
+#
+#   ./init.sh debian zookeeper-operator --scale agent=3
+#
 
 set -e
 
 CONTAINER_OS_NAME=${1:-debian}
 COMPONENT=${2:-agent}
+shift
+shift
+
+. stackable-scripts/functions.sh
 
 PARENT_DIR=$(dirname $(pwd))
-
-# --- helper functions for logs ---
-info()
-{
-    echo '[INFO] ' "$@"
-}
-warn()
-{
-    echo '[WARN] ' "$@" >&2
-  }
-fatal()
-{
-    echo '[ERROR] ' "$@" >&2
-    exit 1
-}
 
 write_env_file() {
 
@@ -77,13 +71,29 @@ compose_up() {
     COMPOSE_DIR=centos
   fi
 
-  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans 
+  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans $@
 }
 
 maybe_install_agent() {
-  if [ "$COMPONENT" != "agent" ]; then
-    docker exec -t agent /stackable-scripts/install-agent.sh
+
+  if [ "$COMPONENT" = "agent" ]; then
+    # No agent is installed here since it is mapped from the local folders.
+    return
   fi
+
+  #
+  # Install the agent in all containers when testing an operator.
+  #
+  for AGENT_CONTAINER_NAME in $(docker ps | awk '/agent/ { print $NF }'); do
+    info Install agent in container ${AGENT_CONTAINER_NAME}...
+    docker exec -t ${AGENT_CONTAINER_NAME}  /stackable-scripts/install-agent.sh
+    info "done."
+  done
+
+  info Install agent requirements...
+  docker exec -t k3s /stackable-scripts/install-agent-reqs.sh
+  info "done."
+
 }
 
 #--------------------
@@ -91,6 +101,7 @@ maybe_install_agent() {
 #--------------------
 {
   write_env_file
-  compose_up
+  compose_up $@
   maybe_install_agent
 }
+

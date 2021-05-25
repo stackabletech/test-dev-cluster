@@ -14,11 +14,13 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - kubeconfig:/etc/rancher/k3s
+      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
 
   agent:
     privileged: true
     image: docker.stackable.tech/debian-devel-base
-    container_name: agent
+    deploy:
+      replicas: 1
     working_dir: /agent
     tty: false
     stdin_open: false
