@@ -58,9 +58,14 @@ __NOTE__ This assumes that you have `xxx-operator` and `xxx-oprerator-integratio
 
 Initialize the cluster.
 
-    ./init.sh [debian|centos7|centos8] xxx-operator
+    ./init.sh [debian|centos7|centos8] xxx-operator [docker-compose-options]
 
 This is only necessary once per test/dev session. The `xxx-operator` repo is mounted in the root of the `operator` container. In the `agent` container, the latest version of the agent is installed from the appropriate repository. Also the Stackable Repository CRD is created and the `certificatesigningrequest` is approved so the agent is ready to go.
+
+The third and following arguments are passed on to `docker-compose up`. For example:
+
+  # start a cluster with three kubelets and zookeeper-operator integration tests
+  ./init.sh debian zookeeper-operator --scale agent=3
 
 Start the operator
 
