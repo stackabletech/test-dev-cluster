@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
 COMMAND=${1}
+shift;
 
 agent_container_name() {
   docker ps | awk '/agent/ {print $NF}'
