@@ -14,4 +14,3 @@ fatal()
     exit 1
 }
 
-
