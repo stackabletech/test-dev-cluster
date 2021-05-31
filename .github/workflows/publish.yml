@@ -6,7 +6,7 @@ on:
     branches:
       - main
   #
-  # Run monthly on the 10th at 06:42
+  # Run monthly on the 10th at 06:42 UTC
   #
   schedule:
     - cron: '42 6 10 * *'
