@@ -5,6 +5,13 @@ on:
   push:
     branches:
       - main
+  #
+  # Run monthly on the 10th at 06:42
+  #
+  schedule:
+    - cron: '42 6 10 * *'
+
+  workflow_dispatch:
 
 jobs:
 
