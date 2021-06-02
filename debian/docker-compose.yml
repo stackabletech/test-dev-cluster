@@ -49,6 +49,18 @@ services:
     depends_on:
       - k3s
 
+  sidecar:
+    privileged: true
+    image: docker.stackable.tech/debian-devel-base
+    tty: false
+    stdin_open: false
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
+      - kubeconfig:/etc/rancher/k3s:ro
+    depends_on:
+      - k3s
+
 volumes:
   kubeconfig:
   dummy:

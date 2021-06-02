@@ -4,7 +4,7 @@
 #
 # Usage:
 #
-#   ./init.sh [debian|centos7|centos8] [agent|spark-operator|zookeeper-operator] [additional args for docker-compose]
+#   ./init.sh <container-os-name> <component> [compose-arguments]
 #
 # Examples:
 #
@@ -15,14 +15,49 @@
 
 set -e
 
-CONTAINER_OS_NAME=${1:-debian}
-COMPONENT=${2:-agent}
-shift
-shift
+CONTAINER_OS_NAME=${1}
+COMPONENT=${2}
+shift; shift;
+COMPOSE_ARGS=$@
 
 . stackable-scripts/functions.sh
 
 PARENT_DIR=$(dirname $(pwd))
+
+check_args() {
+
+  case ${CONTAINER_OS_NAME} in
+  debian|centos7|centos8)
+    ;;
+   *)
+    usage
+    fatal "Unknown container OS: ${CONTAINER_OS_NAME}."
+    ;;
+  esac
+
+  case ${COMPONENT} in
+  agent|spark-operator|zookeeper-operator|kafka-operator)
+    ;;
+   *)
+    usage
+    fatal "Unknown component: ${COMPONENT}."
+    ;;
+  esac
+}
+
+usage() {
+  cat <<USAGE
+Usage:
+
+    $0 <container-os-name> <component> [compose-arguments]
+
+Arguments:
+
+    container-os-name: debian, centos7, centos8
+    component:         agent, zookeeper-operator, spark-operator, kafka-operator
+    compose-arguments: Optional. Example: --scale agent=3
+USAGE
+}
 
 write_env_file() {
 
@@ -35,18 +70,14 @@ write_env_file() {
   local OPERATOR_TESTS_SRC_DIR=dummy
 
   case ${COMPONENT} in
-  k3s)
-    ;;
   agent)
     AGENT_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-  spark-operator|zookeeper-operator)
+  spark-operator|zookeeper-operator|kafka-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-   *)
-    fatal "Unknown component: ${COMPONENT}. Valid values are: agent, spark-operator, zookeeper-operator"
   esac
 
     tee ${ENV_FILE}  > /dev/null <<EOF
@@ -68,7 +99,19 @@ compose_up() {
     COMPOSE_DIR=centos
   fi
 
-  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans $@
+  local SERVICES=k3s
+  case ${COMPONENT} in
+    agent)
+      SERVICES="${SERVICES} agent"
+    ;;
+    zookeeper-operator|spark-operator)
+      SERVICES="${SERVICES} agent operator"
+    ;;
+    kafka-operator)
+      SERVICES="${SERVICES} agent operator sidecar"
+    ;;
+  esac
+  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans  ${SERVICES} ${COMPOSE_ARGS}
 }
 
 maybe_install_agent() {
@@ -118,12 +161,16 @@ label_agent_nodes() {
     done
 }
 
+#maybe_install_sidecar() {}
+
 #--------------------
 # main
 #--------------------
 {
+  check_args
   write_env_file
   compose_up $@
   maybe_install_agent
+  maybe_install_sidecar
 }
 
