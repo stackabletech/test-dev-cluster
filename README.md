@@ -49,7 +49,11 @@ Start the integration tests
 
 # The XXX operator
 
-Currently XXX can only be replaced with `zookeeper`. In the future `spark`, `nifi`, `hdfs`, etc. will be added to the list.
+Supported operator integration tests:
+* zookeeper
+* spark
+
+In the future `nifi`, `hdfs`, etc. will be added to the list.
 
 __NOTE__ This assumes that you have `xxx-operator` and `xxx-oprerator-integration-tests` repositories checkout on your developmnent system. If any of those repositories are missing, this will not work. There are no sanity checks at the moment.
 
