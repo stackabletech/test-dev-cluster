@@ -38,15 +38,12 @@ write_env_file() {
   k3s)
     ;;
   agent)
-    AGENT_SRC_DIR=${PARENT_DIR}/agent
-    AGENT_TESTS_SRC_DIR=${PARENT_DIR}/agent-integration-tests
+    AGENT_SRC_DIR=${PARENT_DIR}/${COMPONENT}
+    AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-  spark-operator)
-    OPERATOR_SRC_DIR=${PARENT_DIR}/spark-operator
-    ;;
-  zookeeper-operator)
-    OPERATOR_SRC_DIR=${PARENT_DIR}/zookeeper-operator
-    OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/zookeeper-operator-integration-tests
+  spark-operator|zookeeper-operator)
+    OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
+    OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
    *)
     fatal "Unknown component: ${COMPONENT}. Valid values are: agent, spark-operator, zookeeper-operator"
