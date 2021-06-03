@@ -8,8 +8,8 @@ COMPONENT=$1
 # * install stackable repository CRD and CR.
 #
 wait_for_k3s() {
-  until kubectl get crds; do
-    >&2 echo "k3s is not running yet."
+  until kubectl get crds >/dev/null 2>&1; do
+    >&2 echo "[WARN]  k3s is not running yet."
     sleep 1
   done
 }
@@ -23,9 +23,5 @@ case ${COMPONENT} in
     /stackable-scripts/apply-cr.sh repository
     /stackable-scripts/approve-cert-request.sh
     ;;
-  zookeeper-operator)
-    /stackable-scripts/apply-crd.sh zookeeper-cluster
-    /stackable-scripts/apply-cr.sh zookeeper-cluster
-  ;;
 esac
 }

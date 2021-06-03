@@ -8,8 +8,6 @@ set -e
 
 source ${HOME}/.cargo/env
 
-nohup /stackable-scripts/apply-crd.sh repository &
-
 # Wait 15 minutes (900 seconds) before exiting. Gives the agent time to compile.
 nohup /stackable-scripts/approve-cert-request.sh 900&
 

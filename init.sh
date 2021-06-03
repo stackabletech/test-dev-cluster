@@ -3,13 +3,14 @@
 # Initialize a testing environment with docker compose.
 #
 # Usage:
-#
 #   ./init.sh <container-os-name> <component> [compose-arguments]
+#
+# Note:
+#   <component> is the *thing* to be tested
 #
 # Examples:
 #
 # Initialize the cluster for testing the zookeeper-operator with 3 kubelets:
-#
 #   ./init.sh debian zookeeper-operator --scale agent=3
 #
 
@@ -169,7 +170,8 @@ maybe_install_sidecar() {
   if [ "$COMPONENT" = "kafka-operator" ]; then
     # Here we install the CRD and CR first to avoid a bug in the operator
     info Start zookeeper operator requirements install ...
-    docker exec -t k3s /stackable-scripts/install-reqs.sh zookeeper-operator
+    docker exec -t k3s /stackable-scripts/apply-crd.sh zookeeper-cluster
+    docker exec -t k3s /stackable-scripts/apply-cr.sh zookeeper-cluster
     info Finish zookeeper operator requirements install.
 
     info Start zookeeper operator install...
@@ -177,6 +179,22 @@ maybe_install_sidecar() {
     docker exec -t ${SIDECAR_CONTAINER_NAME}  /stackable-scripts/install-zookeeper-operator.sh
     info Finish zookeeper operator install.
   fi
+}
+
+maybe_install_component_reqs() {
+  until docker exec -t k3s kubectl cluster-info >/dev/null 2>&1; do
+    warn k3s is not running yet.
+    sleep 2
+  done
+
+  info Start ${COMPONENT} requirements install...
+  if [ "${COMPONENT}" = "agent" ]; then
+    local AGENT_CONTAINER_NAME=$(docker ps --filter name=agent --format '{{.Names}}' | head -1)
+    docker exec -t ${AGENT_CONTAINER_NAME} kubectl apply -f /${COMPONENT}/deploy/crd
+  else
+    docker exec -t operator kubectl apply -f /${COMPONENT}/deploy/crd
+  fi
+  info Finish ${COMPONENT} requirements install.
 }
 
 #--------------------
@@ -188,6 +206,7 @@ maybe_install_sidecar() {
   compose_up
   maybe_install_agent
   maybe_label_agent_nodes
+  maybe_install_component_reqs
   maybe_install_sidecar
 }
 
