@@ -111,7 +111,7 @@ compose_up() {
       SERVICES="${SERVICES} agent operator sidecar"
     ;;
   esac
-  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans  ${SERVICES} ${COMPOSE_ARGS}
+  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_ARGS} ${SERVICES}
 }
 
 maybe_install_agent() {
@@ -131,7 +131,7 @@ maybe_install_agent() {
   done
 
   info Start agent requirements install...
-  docker exec -t k3s /stackable-scripts/install-agent-reqs.sh agent
+  docker exec -t k3s /stackable-scripts/install-reqs.sh agent
   info Finish agent requirements install.
 }
 
@@ -169,7 +169,7 @@ maybe_install_sidecar() {
   if [ "$COMPONENT" = "kafka-operator" ]; then
     # Here we install the CRD and CR first to avoid a bug in the operator
     info Start zookeeper operator requirements install ...
-    docker exec -t k3s /stackable-scripts/install-agent-reqs.sh zookeeper-operator
+    docker exec -t k3s /stackable-scripts/install-reqs.sh zookeeper-operator
     info Finish zookeeper operator requirements install.
 
     info Start zookeeper operator install...

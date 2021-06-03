@@ -19,13 +19,13 @@ wait_for_k3s
 
 case ${COMPONENT} in
   agent)
-    /stackable-scripts/apply-spec-repository.sh repository
-    /stackable-scripts/apply-cr-repository.sh repository
+    /stackable-scripts/apply-crd.sh repository
+    /stackable-scripts/apply-cr.sh repository
     /stackable-scripts/approve-cert-request.sh
     ;;
   zookeeper-operator)
-    /stackable-scripts/apply-spec-repository.sh zookeeper-cluster
-    /stackable-scripts/apply-cr-repository.sh zookeeper-cluster
+    /stackable-scripts/apply-crd.sh zookeeper-cluster
+    /stackable-scripts/apply-cr.sh zookeeper-cluster
   ;;
 esac
 }
