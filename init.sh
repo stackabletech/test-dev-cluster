@@ -132,36 +132,46 @@ maybe_install_agent() {
 
   info Install agent requirements...
   docker exec -t k3s /stackable-scripts/install-agent-reqs.sh
-  info "done."
+  info Agent requirements installation done.
+}
 
-  info Label agents...
+maybe_label_agent_nodes() {
+    local NODE_ID=""
+    local NODE_NUM=""
+
+  if [ "$COMPONENT" = "agent" ]; then
+    # No agent is installed here since it is mapped from the local folders.
+    return
+  fi
+
   #
   # Give k3s time to register nodes properly. Sometimes "kubectl get nodes" lists several nodes
   # but "kubectl label node" fails because the node is not available.
   #
   sleep 5
 
-  label_agent_nodes
+  #
+  # Label each node with node=<num> where num corresponds to the container name.
+  #
+  # For example if container name is "debian_agent_3", then label this agent with "node=3"
+  #
+  for PAIR_ID_NAME in $(docker ps --filter name=agent --format '{{.ID}}-{{.Names}}' | sort -t'-' -k2); do
+    NODE_ID=$(echo $PAIR_ID_NAME | awk '{split($0, a, "-"); print a[1]}')
+    NODE_NUM=$(echo $PAIR_ID_NAME | awk '{split($0, a, "_"); print a[3]}')
+    info Labeling node ${NODE_ID} with node=${NODE_NUM}
+    docker exec -t k3s kubectl label node ${NODE_ID} node=${NODE_NUM}
+  done
 }
 
-label_agent_nodes() {
-    local NODE_ID=""
-    local NODE_NUM=""
+maybe_install_sidecar() {
 
-    #
-    # Label each node with node=<num> where num corresponds to the container name.
-    #
-    # For example if container name is "debian_agent_3", then label this agent with "node=3"
-    #
-    for PAIR_ID_NAME in $(docker ps --filter name=agent --format '{{.ID}}-{{.Names}}' | sort -t'-' -k2); do
-	    NODE_ID=$(echo $PAIR_ID_NAME | awk '{split($0, a, "-"); print a[1]}')
-	    NODE_NUM=$(echo $PAIR_ID_NAME | awk '{split($0, a, "_"); print a[3]}')
-	    info Labeling node ${NODE_ID} with node=${NODE_NUM}
-	    docker exec -t k3s kubectl label node ${NODE_ID} node=${NODE_NUM}
-    done
+  if [ "$COMPONENT" = "kafka-operator" ]; then
+    info Start Zookeeper operator installation
+    local SIDECAR_CONTAINER_NAME=$(docker ps -q --filter name=sidecar --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME}  /stackable-scripts/install-zookeeper-operator.sh
+    info Stop Zookeeper operator installation
+  fi
 }
-
-#maybe_install_sidecar() {}
 
 #--------------------
 # main
@@ -171,6 +181,7 @@ label_agent_nodes() {
   write_env_file
   compose_up $@
   maybe_install_agent
+  maybe_label_agent_nodes
   maybe_install_sidecar
 }
 

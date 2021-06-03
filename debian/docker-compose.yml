@@ -52,6 +52,7 @@ services:
   sidecar:
     privileged: true
     image: docker.stackable.tech/debian-devel-base
+    working_dir: /stackable-scripts
     tty: false
     stdin_open: false
     volumes:
