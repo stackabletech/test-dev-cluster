@@ -28,9 +28,6 @@ install_package() {
       exit 1
       ;;
   esac
-
-  # Install Zookeeper operator CRD
-  curl -q -XGET https://raw.githubusercontent.com/stackabletech/zookeeper-operator/main/deploy/crd/zookeepercluster.crd.yaml | kubectl apply -f -
 }
 
 install_service_environment() {

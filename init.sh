@@ -125,14 +125,14 @@ maybe_install_agent() {
   # Install the agent in all containers when testing an operator.
   #
   for AGENT_CONTAINER_NAME in $(docker ps --filter name=agent --format '{{.Names}}' | sort); do
-    info Install agent in container ${AGENT_CONTAINER_NAME}...
+    info Start agent install in container ${AGENT_CONTAINER_NAME}...
     docker exec -t ${AGENT_CONTAINER_NAME}  /stackable-scripts/install-agent.sh
-    info "done."
+    info Finish agent install.
   done
 
-  info Install agent requirements...
-  docker exec -t k3s /stackable-scripts/install-agent-reqs.sh
-  info Agent requirements installation done.
+  info Start agent requirements install...
+  docker exec -t k3s /stackable-scripts/install-agent-reqs.sh agent
+  info Finish agent requirements install.
 }
 
 maybe_label_agent_nodes() {
@@ -158,18 +158,24 @@ maybe_label_agent_nodes() {
   for PAIR_ID_NAME in $(docker ps --filter name=agent --format '{{.ID}}-{{.Names}}' | sort -t'-' -k2); do
     NODE_ID=$(echo $PAIR_ID_NAME | awk '{split($0, a, "-"); print a[1]}')
     NODE_NUM=$(echo $PAIR_ID_NAME | awk '{split($0, a, "_"); print a[3]}')
-    info Labeling node ${NODE_ID} with node=${NODE_NUM}
+    info Start node labeling for node ${NODE_ID} with node=${NODE_NUM}
     docker exec -t k3s kubectl label node ${NODE_ID} node=${NODE_NUM}
+    info Finish node labeling.
   done
 }
 
 maybe_install_sidecar() {
 
   if [ "$COMPONENT" = "kafka-operator" ]; then
-    info Start Zookeeper operator installation
+    # Here we install the CRD and CR first to avoid a bug in the operator
+    info Start zookeeper operator requirements install ...
+    docker exec -t k3s /stackable-scripts/install-agent-reqs.sh zookeeper-operator
+    info Finish zookeeper operator requirements install.
+
+    info Start zookeeper operator install...
     local SIDECAR_CONTAINER_NAME=$(docker ps -q --filter name=sidecar --format '{{.Names}}')
     docker exec -t ${SIDECAR_CONTAINER_NAME}  /stackable-scripts/install-zookeeper-operator.sh
-    info Stop Zookeeper operator installation
+    info Finish zookeeper operator install.
   fi
 }
 
@@ -179,7 +185,7 @@ maybe_install_sidecar() {
 {
   check_args
   write_env_file
-  compose_up $@
+  compose_up
   maybe_install_agent
   maybe_label_agent_nodes
   maybe_install_sidecar

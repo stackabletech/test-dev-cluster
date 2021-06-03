@@ -1,4 +1,7 @@
 #!/bin/bash
+
+COMPONENT=$1
+
 #
 # Set up agent requirements:
 # * approve certificate signing request (runs in the background)
@@ -12,8 +15,17 @@ wait_for_k3s() {
 }
 
 {
-  wait_for_k3s
-  /stackable-scripts/apply-spec-repository.sh
-  /stackable-scripts/apply-cr-repository.sh
-  /stackable-scripts/approve-cert-request.sh
+wait_for_k3s
+
+case ${COMPONENT} in
+  agent)
+    /stackable-scripts/apply-spec-repository.sh repository
+    /stackable-scripts/apply-cr-repository.sh repository
+    /stackable-scripts/approve-cert-request.sh
+    ;;
+  zookeeper-operator)
+    /stackable-scripts/apply-spec-repository.sh zookeeper-cluster
+    /stackable-scripts/apply-cr-repository.sh zookeeper-cluster
+  ;;
+esac
 }
