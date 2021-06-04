@@ -4,7 +4,7 @@ CR_NAME=$1
 
 case $CR_NAME in
     repository)
-        kubectl get repositories || kubectl apply -f /stackable-scripts/cr/repository.yaml
+        kubectl apply -f /stackable-scripts/cr/repository.yaml
         ;;
     zookeeper-cluster)
         # Get the host name of the first node (and remove the "node/" prefix from the kubectl output)
