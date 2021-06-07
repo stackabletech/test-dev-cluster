@@ -50,13 +50,17 @@ Start the integration tests
 # The XXX operator
 
 Supported operator integration tests:
-* zookeeper
-* spark
+* ZooKeeper
+* Spark
+* Kafka
 
 In the future `nifi`, `hdfs`, etc. will be added to the list.
 
-__NOTE__ This assumes that you have `xxx-operator` and `xxx-oprerator-integration-tests` repositories checkout on your developmnent system. If any of those repositories are missing, this will not work. There are no sanity checks at the moment.
+This assumes that you have `xxx-operator` and `xxx-oprerator-integration-tests` repositories checked out on your developmnent system. If any of those repositories are missing, this will not work. There are no sanity checks at the moment.
 
+## Notes on the Kafka operator
+
+When testing the Kafka operator by using `./init.sh debian kafka-operator` for example, an additional sidecar container is started. In this container, the nightly ZooKeeper operator and a single node ZooKeeper cluster are installed.
 
 ## Test/Dev cycle
 

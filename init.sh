@@ -3,26 +3,62 @@
 # Initialize a testing environment with docker compose.
 #
 # Usage:
+#   ./init.sh <container-os-name> <component> [compose-arguments]
 #
-#   ./init.sh [debian|centos7|centos8] [agent|spark-operator|zookeeper-operator] [additional args for docker-compose]
+# Note:
+#   <component> is the *thing* to be tested
 #
 # Examples:
 #
 # Initialize the cluster for testing the zookeeper-operator with 3 kubelets:
-#
 #   ./init.sh debian zookeeper-operator --scale agent=3
 #
 
 set -e
 
-CONTAINER_OS_NAME=${1:-debian}
-COMPONENT=${2:-agent}
-shift
-shift
+CONTAINER_OS_NAME=${1}
+COMPONENT=${2}
+shift; shift;
+COMPOSE_ARGS=$@
 
 . stackable-scripts/functions.sh
 
 PARENT_DIR=$(dirname $(pwd))
+
+check_args() {
+
+  case ${CONTAINER_OS_NAME} in
+  debian|centos7|centos8)
+    ;;
+   *)
+    usage
+    fatal "Unknown container OS: ${CONTAINER_OS_NAME}."
+    ;;
+  esac
+
+  case ${COMPONENT} in
+  agent|spark-operator|zookeeper-operator|kafka-operator)
+    ;;
+   *)
+    usage
+    fatal "Unknown component: ${COMPONENT}."
+    ;;
+  esac
+}
+
+usage() {
+  cat <<USAGE
+Usage:
+
+    $0 <container-os-name> <component> [compose-arguments]
+
+Arguments:
+
+    container-os-name: debian, centos7, centos8
+    component:         agent, zookeeper-operator, spark-operator, kafka-operator
+    compose-arguments: Optional. Example: --scale agent=3
+USAGE
+}
 
 write_env_file() {
 
@@ -35,18 +71,14 @@ write_env_file() {
   local OPERATOR_TESTS_SRC_DIR=dummy
 
   case ${COMPONENT} in
-  k3s)
-    ;;
   agent)
     AGENT_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-  spark-operator|zookeeper-operator)
+  spark-operator|zookeeper-operator|kafka-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-   *)
-    fatal "Unknown component: ${COMPONENT}. Valid values are: agent, spark-operator, zookeeper-operator"
   esac
 
     tee ${ENV_FILE}  > /dev/null <<EOF
@@ -68,7 +100,19 @@ compose_up() {
     COMPOSE_DIR=centos
   fi
 
-  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans $@
+  local SERVICES=k3s
+  case ${COMPONENT} in
+    agent)
+      SERVICES="${SERVICES} agent"
+    ;;
+    zookeeper-operator|spark-operator)
+      SERVICES="${SERVICES} agent operator"
+    ;;
+    kafka-operator)
+      SERVICES="${SERVICES} agent operator sidecar"
+    ;;
+  esac
+  docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_ARGS} ${SERVICES}
 }
 
 maybe_install_agent() {
@@ -82,48 +126,87 @@ maybe_install_agent() {
   # Install the agent in all containers when testing an operator.
   #
   for AGENT_CONTAINER_NAME in $(docker ps --filter name=agent --format '{{.Names}}' | sort); do
-    info Install agent in container ${AGENT_CONTAINER_NAME}...
+    info Start agent install in container ${AGENT_CONTAINER_NAME}...
     docker exec -t ${AGENT_CONTAINER_NAME}  /stackable-scripts/install-agent.sh
-    info "done."
+    info Finish agent install.
   done
 
-  info Install agent requirements...
-  docker exec -t k3s /stackable-scripts/install-agent-reqs.sh
-  info "done."
+  info Start agent requirements install...
+  docker exec -t k3s /stackable-scripts/install-reqs.sh agent
+  info Finish agent requirements install.
+}
 
-  info Label agents...
+maybe_label_agent_nodes() {
+    local NODE_ID=""
+    local NODE_NUM=""
+
+  if [ "$COMPONENT" = "agent" ]; then
+    # No agent is installed here since it is mapped from the local folders.
+    return
+  fi
+
   #
   # Give k3s time to register nodes properly. Sometimes "kubectl get nodes" lists several nodes
   # but "kubectl label node" fails because the node is not available.
   #
   sleep 5
 
-  label_agent_nodes
+  #
+  # Label each node with node=<num> where num corresponds to the container name.
+  #
+  # For example if container name is "debian_agent_3", then label this agent with "node=3"
+  #
+  for PAIR_ID_NAME in $(docker ps --filter name=agent --format '{{.ID}}-{{.Names}}' | sort -t'-' -k2); do
+    NODE_ID=$(echo $PAIR_ID_NAME | awk '{split($0, a, "-"); print a[1]}')
+    NODE_NUM=$(echo $PAIR_ID_NAME | awk '{split($0, a, "_"); print a[3]}')
+    info Start node labeling for node ${NODE_ID} with node=${NODE_NUM}
+    docker exec -t k3s kubectl label node ${NODE_ID} node=${NODE_NUM}
+    info Finish node labeling.
+  done
 }
 
-label_agent_nodes() {
-    local NODE_ID=""
-    local NODE_NUM=""
+maybe_install_sidecar() {
 
-    #
-    # Label each node with node=<num> where num corresponds to the container name.
-    #
-    # For example if container name is "debian_agent_3", then label this agent with "node=3"
-    #
-    for PAIR_ID_NAME in $(docker ps --filter name=agent --format '{{.ID}}-{{.Names}}' | sort -t'-' -k2); do
-	    NODE_ID=$(echo $PAIR_ID_NAME | awk '{split($0, a, "-"); print a[1]}')
-	    NODE_NUM=$(echo $PAIR_ID_NAME | awk '{split($0, a, "_"); print a[3]}')
-	    info Labeling node ${NODE_ID} with node=${NODE_NUM}
-	    docker exec -t k3s kubectl label node ${NODE_ID} node=${NODE_NUM}
-    done
+  if [ "$COMPONENT" = "kafka-operator" ]; then
+    # Here we install the CRD and CR first to avoid a bug in the operator
+    info Start zookeeper operator requirements install ...
+    docker exec -t k3s /stackable-scripts/apply-crd.sh zookeeper-cluster
+    docker exec -t k3s /stackable-scripts/apply-cr.sh zookeeper-cluster
+    info Finish zookeeper operator requirements install.
+
+    info Start zookeeper operator install...
+    local SIDECAR_CONTAINER_NAME=$(docker ps -q --filter name=sidecar --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME}  /stackable-scripts/install-zookeeper-operator.sh
+    info Finish zookeeper operator install.
+  fi
+}
+
+maybe_install_component_reqs() {
+  until docker exec -t k3s kubectl cluster-info >/dev/null 2>&1; do
+    warn k3s is not running yet.
+    sleep 2
+  done
+
+  info Start ${COMPONENT} requirements install...
+  if [ "${COMPONENT}" = "agent" ]; then
+    local AGENT_CONTAINER_NAME=$(docker ps --filter name=agent --format '{{.Names}}' | head -1)
+    docker exec -t ${AGENT_CONTAINER_NAME} kubectl apply -f /${COMPONENT}/deploy/crd
+  else
+    docker exec -t operator kubectl apply -f /${COMPONENT}/deploy/crd
+  fi
+  info Finish ${COMPONENT} requirements install.
 }
 
 #--------------------
 # main
 #--------------------
 {
+  check_args
   write_env_file
-  compose_up $@
+  compose_up
   maybe_install_agent
+  maybe_label_agent_nodes
+  maybe_install_component_reqs
+  maybe_install_sidecar
 }
 
