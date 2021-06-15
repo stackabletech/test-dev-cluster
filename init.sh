@@ -208,5 +208,6 @@ maybe_install_component_reqs() {
   maybe_label_agent_nodes
   maybe_install_component_reqs
   maybe_install_sidecar
+  prepare_install_kubeconfig
 }
 
