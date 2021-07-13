@@ -197,6 +197,23 @@ maybe_install_component_reqs() {
   info Finish ${COMPONENT} requirements install.
 }
 
+maybe_install_monitoring() {
+
+  if [ "$COMPONENT" = "agent" ]; then
+    # No agent is installed here since it is mapped from the local folders.
+    return
+  fi
+
+  #
+  # Install the agent in all containers when testing an operator.
+  #
+  for AGENT_CONTAINER_NAME in $(docker ps --filter name=agent --format '{{.Names}}' | sort); do
+    info "Start monitor components install in container ${AGENT_CONTAINER_NAME}..."
+    docker exec -t ${AGENT_CONTAINER_NAME}  /stackable-scripts/install-monitoring.sh
+    info Finish monitor components install.
+  done
+}
+
 #--------------------
 # main
 #--------------------
@@ -205,6 +222,7 @@ maybe_install_component_reqs() {
   write_env_file
   compose_up
   maybe_install_agent
+  maybe_install_monitoring
   maybe_label_agent_nodes
   maybe_install_component_reqs
   maybe_install_sidecar

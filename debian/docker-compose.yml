@@ -32,6 +32,8 @@ services:
       - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
       - k3s
+    ports:
+      - "8428:8428"
 
   operator:
     privileged: true
