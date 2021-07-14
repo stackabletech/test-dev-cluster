@@ -8,7 +8,9 @@ scrape_configs:
           names:
             - default
     scheme: http
+    # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/app/vmagent/README.md#relabeling
     relabel_debug: true
+    # metric_relabel_configs: # https://www.robustperception.io/relabel_configs-vs-metric_relabel_configs
     relabel_configs:
       # requires: kubectl annotate pods zookeeper-simple-default-server-4a5a3d580b24 prometheus.io/scrape=true
     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
