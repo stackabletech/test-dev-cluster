@@ -17,19 +17,25 @@ install_victoria_metrics() {
   cat <<EOF > config.yaml
 ---
 rules:
-  - pattern: "metrics<name=master\\\\.(.*), type=counters><>Value"
-    name: spark_master_\$1
+  # replicated Zookeeper
+  - pattern: "org.apache.ZooKeeperService<name0=ReplicatedServer_id(\\\\d+)><>(\\\\w+)"
+    name: "zookeeper_\$2"
+    type: GAUGE
+  # standalone Zookeeper
+  - pattern: "org.apache.ZooKeeperService<name0=StandaloneServer_port(\\\\d+)><>(\\\\w+)"
+    type: GAUGE
+    name: "zookeeper_\$2"
 EOF
 
   cat <<EOF1 > test-cluster.yaml
 ---
-apiVersion: spark.stackable.tech/v1
-kind: SparkCluster
+apiVersion: zookeeper.stackable.tech/v1
+kind: ZookeeperCluster
 metadata:
   name: simple
 spec:
-  version: "3.0.1"
-  masters:
+  version: 3.5.8
+  servers:
     selectors:
       default:
         selector:
@@ -37,50 +43,36 @@ spec:
             kubernetes.io/arch: stackable-linux
         instances: 1
         instancesPerNode: 1
-        config:
-          masterPort: 7078
-          masterWebUiPort: 8081
-  workers:
-    selectors:
-      1core1g:
-        selector:
-          matchLabels:
-            kubernetes.io/arch: stackable-linux
-        instances: 1
-        instancesPerNode: 1
-        config:
-          workerPort: 3031
-          workerWebUiPort: 8083
 EOF1
 
-  cat <<EOF2 > prometheus.yaml
----
-scrape_configs:
-  - job_name: spark
-    metrics_path: /metrics/master/prometheus
-    scrape_interval: 5s
-    scrape_timeout: 5s
-    static_configs:
-      - targets:
-        - localhost:8080
-EOF2
+#  cat <<EOF2 > prometheus.yaml
+#---
+#scrape_configs:
+#  - job_name: spark
+#    metrics_path: /metrics/master/prometheus
+#    scrape_interval: 5s
+#    scrape_timeout: 5s
+#    static_configs:
+#      - targets:
+#        - localhost:8080
+#EOF2
 
-  cat <<EOF3 > /opt/stackable/packages/spark-3.0.1/spark-3.0.1-bin-hadoop2.7/conf/metrics.properties
-*.sink.console.class=org.apache.spark.metrics.sink.ConsoleSink
-*.sink.console.period=5
-*.sink.console.unit=seconds
-EOF3
+#  cat <<EOF3 > /opt/stackable/packages/spark-3.0.1/spark-3.0.1-bin-hadoop2.7/conf/metrics.properties
+#*.sink.console.class=org.apache.spark.metrics.sink.ConsoleSink
+#*.sink.console.period=5
+#*.sink.console.unit=seconds
+#EOF3
 
   popd
 
-  export SPARK_MASTER_OPTS="-javaagent:/opt/stackable-monitoring/jmx_prometheus_javaagent-0.16.0.jar=9090:/opt/stackable-monitoring/config.yaml"
-  export SERVER_JVMFLAGS="-javaagent:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/jmx_prometheus_javaagent-0.16.0.jar=9090:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/config.yaml"
+  #export SPARK_MASTER_OPTS="-javaagent:/opt/stackable-monitoring/jmx_prometheus_javaagent-0.16.0.jar=9090:/opt/stackable-monitoring/config.yaml"
+  export SERVER_JVMFLAGS="-javaagent:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/jmx_prometheus_javaagent-0.16.0.jar=9404:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/config.yaml"
   # /opt/stackable/packages/spark-3.0.1/spark-3.0.1-bin-hadoop2.7/sbin/start-master.sh
   # . /stackable-scripts/install-monitoring.sh
 }
 
 start_victoria_metrics() {
-  ${VMETRICS_INSTALL_DIR}/${VMETRICS_BIN_NAME} -storageDataPath=${VMETRICS_DATA_DIR} -retentionPeriod=1h -promscrape.config=/opt/stackable-monitoring/prometheus.yaml -promscrape.config.strictParse=true
+  ${VMETRICS_INSTALL_DIR}/${VMETRICS_BIN_NAME} -storageDataPath=${VMETRICS_DATA_DIR} -retentionPeriod=1h -promscrape.config=/stackable-scripts/prometheus.yaml -promscrape.config.strictParse=true
 }
 
 {

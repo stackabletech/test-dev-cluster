@@ -1,0 +1,38 @@
+scrape_configs:
+  - job_name: test_scrape_config
+    scrape_interval: 10s
+    kubernetes_sd_configs:
+      - role: pod
+        api_server: 127.0.0.1:8001
+        namespaces:
+          names:
+            - default
+    scheme: http
+    relabel_debug: true
+    relabel_configs:
+      # requires: kubectl annotate pods zookeeper-simple-default-server-4a5a3d580b24 prometheus.io/scrape=true
+    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+      action: keep
+      regex: true
+      # requires: kubectl annotate pods zookeeper-simple-default-server-4a5a3d580b24 prometheus.io/port=9404
+    - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+      action: replace
+      regex: ([^:]+)(?::\d+)?;(\d+)
+      replacement: $1:$2
+      target_label: __address__
+    - action: labelmap
+      regex: __meta_kubernetes_pod_label_(.+)
+    - source_labels: [__meta_kubernetes_namespace]
+      action: replace
+      target_label: kubernetes_namespace
+    - source_labels: [__meta_kubernetes_pod_name]
+      action: replace
+      target_label: kubernetes_pod_name
+#scrape_configs:
+#  - job_name: test
+#    metrics_path: /metrics
+#    scrape_interval: 5s
+#    scrape_timeout: 5s
+#    static_configs:
+#      - targets:
+#          - localhost:9404
