@@ -16,13 +16,9 @@ install_victoria_metrics() {
   curl -L ${JMX_EXPORTER} -o jmx_prometheus_javaagent-0.16.0.jar
   cat <<EOF > config.yaml
 ---
-startDelaySeconds: 0
-hostPort: 127.0.0.1:12345
-ssl: false
-lowercaseOutputName: false
-lowercaseOutputLabelNames: false
-whitelistObjectNames: ["spark:*"]
-blacklistObjectNames: ["org.apache.cassandra.metrics:type=ColumnFamily,*"]
+rules:
+  - pattern: "metrics<name=master\\\\.(.*), type=counters><>Value"
+    name: spark_master_\$1
 EOF
 
   cat <<EOF1 > test-cluster.yaml
@@ -61,15 +57,24 @@ EOF1
 ---
 scrape_configs:
   - job_name: spark
+    metrics_path: /metrics/master/prometheus
     scrape_interval: 5s
     scrape_timeout: 5s
     static_configs:
       - targets:
-        - localhost:9090
+        - localhost:8080
 EOF2
+
+  cat <<EOF3 > /opt/stackable/packages/spark-3.0.1/spark-3.0.1-bin-hadoop2.7/conf/metrics.properties
+*.sink.console.class=org.apache.spark.metrics.sink.ConsoleSink
+*.sink.console.period=5
+*.sink.console.unit=seconds
+EOF3
+
   popd
 
   export SPARK_MASTER_OPTS="-javaagent:/opt/stackable-monitoring/jmx_prometheus_javaagent-0.16.0.jar=9090:/opt/stackable-monitoring/config.yaml"
+  export SERVER_JVMFLAGS="-javaagent:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/jmx_prometheus_javaagent-0.16.0.jar=9090:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/config.yaml"
   # /opt/stackable/packages/spark-3.0.1/spark-3.0.1-bin-hadoop2.7/sbin/start-master.sh
   # . /stackable-scripts/install-monitoring.sh
 }
