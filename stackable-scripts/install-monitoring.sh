@@ -6,14 +6,20 @@ VMETRICS_INSTALL_DIR="/opt/stackable-monitoring"
 VMETRICS_DATA_DIR="/var/lib/victoria-metrics-data"
 VMETRICS_BIN_NAME="victoria-metrics-prod"
 
+PROM_URL="https://github.com/prometheus/prometheus/releases/download/v2.28.1/prometheus-2.28.1.linux-amd64.tar.gz"
+PROM_BIN_NAME="prometheus"
+
 JMX_EXPORTER="https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.0/jmx_prometheus_javaagent-0.16.0.jar"
 
 install_victoria_metrics() {
   mkdir -p ${VMETRICS_INSTALL_DIR}
 
   pushd ${VMETRICS_INSTALL_DIR}
-  curl -L ${VMETRICS_URL} | tar xzf -
-  curl -L ${JMX_EXPORTER} -o jmx_prometheus_javaagent-0.16.0.jar
+  #curl -L ${VMETRICS_URL} | tar xzf -
+  #curl -L ${JMX_EXPORTER} -o jmx_prometheus_javaagent-0.16.0.jar
+
+  #curl -L ${PROM_URL} | tar xzf -
+
   cat <<EOF > config.yaml
 ---
 rules:
@@ -73,6 +79,10 @@ EOF1
 
 start_victoria_metrics() {
   ${VMETRICS_INSTALL_DIR}/${VMETRICS_BIN_NAME} -storageDataPath=${VMETRICS_DATA_DIR} -retentionPeriod=1h -promscrape.config=/stackable-scripts/prometheus.yaml -promscrape.config.strictParse=true
+}
+
+start_prom_metrics() {
+  ${VMETRICS_INSTALL_DIR}/prometheus-2.28.1.linux-amd64/${PROM_BIN_NAME} --log.level debug --config.file=/stackable-scripts/prometheus.yaml
 }
 
 {
