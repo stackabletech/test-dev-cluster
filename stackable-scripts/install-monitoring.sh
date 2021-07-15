@@ -9,16 +9,24 @@ VMETRICS_BIN_NAME="victoria-metrics-prod"
 PROM_URL="https://github.com/prometheus/prometheus/releases/download/v2.28.1/prometheus-2.28.1.linux-amd64.tar.gz"
 PROM_BIN_NAME="prometheus"
 
-JMX_EXPORTER="https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.0/jmx_prometheus_javaagent-0.16.0.jar"
+JMX_EXPORTER_URL="https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.0/jmx_prometheus_javaagent-0.16.0.jar"
+JMX_EXPORTER_BIN_NAME="jmx_prometheus_javaagent-0.16.0.jar"
 
 install_victoria_metrics() {
   mkdir -p ${VMETRICS_INSTALL_DIR}
 
   pushd ${VMETRICS_INSTALL_DIR}
-  #curl -L ${VMETRICS_URL} | tar xzf -
-  #curl -L ${JMX_EXPORTER} -o jmx_prometheus_javaagent-0.16.0.jar
+  if [ ! -f "$VMETRICS_BIN_NAME" ]; then
+    curl -L ${VMETRICS_URL} | tar xzf -
+  fi
 
-  #curl -L ${PROM_URL} | tar xzf -
+  if [ ! -f "$JMX_EXPORTER_BIN_NAME" ]; then
+    curl -L ${JMX_EXPORTER_URL} -o ${JMX_EXPORTER_BIN_NAME}
+  fi
+
+  if [ ! -f "prometheus-2.28.1.linux-amd64/$PROM_BIN_NAME" ]; then
+    curl -L ${PROM_URL} | tar xzf -
+  fi
 
   cat <<EOF > config.yaml
 ---
@@ -72,7 +80,7 @@ EOF1
   popd
 
   #export SPARK_MASTER_OPTS="-javaagent:/opt/stackable-monitoring/jmx_prometheus_javaagent-0.16.0.jar=9090:/opt/stackable-monitoring/config.yaml"
-  export SERVER_JVMFLAGS="-javaagent:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/jmx_prometheus_javaagent-0.16.0.jar=9404:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/config.yaml"
+  #export SERVER_JVMFLAGS="-javaagent:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/jmx_prometheus_javaagent-0.16.0.jar=9404:/home/malte/developer/stackable/test/apache-zookeeper-3.5.8-bin/conf/config.yaml"
   # /opt/stackable/packages/spark-3.0.1/spark-3.0.1-bin-hadoop2.7/sbin/start-master.sh
   # . /stackable-scripts/install-monitoring.sh
 }
