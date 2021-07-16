@@ -1,39 +1,46 @@
-global:
-  scrape_interval: 10s
-  evaluation_interval: 10s
+#global:
+#  scrape_interval: 10s
+#  evaluation_interval: 10s
 scrape_configs:
   - job_name: k8pods
     scrape_interval: 10s
     kubernetes_sd_configs:
       - role: pod
         #api_server: 127.0.0.1:8001
-        kubeconfig_file: /home/malte/.kube/config
+        kubeconfig_file: /home/malte/.kube/config # {{kubeconfig}}
 #        namespaces:
 #          names:
 #            - default
-    tls_config:
-      insecure_skip_verify: true
-      cert_file: /home/malte/developer/stackable/krustlet1.crt
-      key_file: /home/malte/developer/stackable/pkcs8.key
+        selectors:
+          - role: pod
+            field: "spec.nodeName=mdesktop"
+    # victoria without kubeconfig_file
+#    tls_config:
+#      insecure_skip_verify: true
+#      cert_file: /home/malte/developer/stackable/krustlet1.crt
+#      key_file: /home/malte/developer/stackable/pkcs8.key
     relabel_configs:
-      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-        action: keep
-        regex: true
-      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+#      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+#        action: keep
+#        regex: true
+#      - source_labels: [ __meta_kubernetes_pod_container_port_name ]
+#        regex: metrics
+#        action: keep
+       # replaced for field selector
+#      - source_labels: [__meta_kubernetes_pod_node_name]
+#        action: keep
+#        regex: mdesktop
+      - source_labels: [__address__, __meta_kubernetes_pod_container_port_number]
         action: replace
         regex: ([^:]+)(?::\d+)?;(\d+)
         replacement: $1:$2
         target_label: __address__
-#      - source_labels: [__meta_kubernetes_pod_name]
-#        action: replace
-#        regex: (.+)
-#        replacement: "localhost:9404"
-#        target_label: __address__
-#      - source_labels: [ __meta_kubernetes_pod_container_port_name ]
-#        regex: metrics
-#        action: keep
       - source_labels: [ __meta_kubernetes_pod_container_name ]
         target_label: job
+      - source_labels: [ __meta_kubernetes_pod_container_port_number ]
+        target_label: container_port
+      - source_labels: [ __meta_kubernetes_pod_node_name ]
+        target_label: node_name
       - action: labelmap
         regex: __meta_kubernetes_pod_label_(.+)
       - source_labels: [__meta_kubernetes_namespace]
@@ -42,7 +49,6 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_pod_name]
         action: replace
         target_label: kubernetes_pod_name
-
 
 #  - job_name: test_scrape_config
 #    scrape_interval: 10s

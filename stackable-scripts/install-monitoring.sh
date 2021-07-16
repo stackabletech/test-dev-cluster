@@ -87,6 +87,7 @@ EOF1
 
 start_victoria_metrics() {
   ${VMETRICS_INSTALL_DIR}/${VMETRICS_BIN_NAME} -storageDataPath=${VMETRICS_DATA_DIR} -retentionPeriod=1h -promscrape.config=/stackable-scripts/prometheus.yaml -promscrape.config.strictParse=true
+  #./victoria-metrics-prod -storageDataPath=/tmp/victoria -retentionPeriod=1h -promscrape.config=/home/malte/developer/workspace/test-dev-cluster/stackable-scripts/prometheus.yaml -promscrape.config.strictParse=true
 }
 
 start_prom_metrics() {
