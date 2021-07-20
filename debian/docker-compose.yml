@@ -33,13 +33,13 @@ services:
     depends_on:
       - k3s
     ports:
-      - "7077:7077"
-      - "8428:8428"
-      - "8080:8080"
-      - "8081:8081"
-      - "9090:9090"
-      - "9404:9404"
-      - "8001:8001"
+      - target: 7077
+      - target: 8001
+      - target: 8080
+      - target: 8081
+      - target: 8428
+      - target: 9090
+      - target: 9404
 
   operator:
     privileged: true

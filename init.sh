@@ -106,10 +106,11 @@ compose_up() {
       SERVICES="${SERVICES} agent"
     ;;
     zookeeper-operator|spark-operator)
-      SERVICES="${SERVICES} agent operator"
+      SERVICES="${SERVICES} agent operator sidecar"
     ;;
     kafka-operator)
       SERVICES="${SERVICES} agent operator sidecar"
+      COMPOSE_ARGS="${COMPOSE_ARGS} -scale sidecar=2" ### one for monitoring and one for zookeeper
     ;;
   esac
   docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_ARGS} ${SERVICES}
@@ -167,6 +168,15 @@ maybe_label_agent_nodes() {
 
 maybe_install_sidecar() {
 
+  ### Install the monitoring operator in the first sidecar container
+  case ${COMPONENT} in
+  spark-operator|zookeeper-operator|kafka-operator)
+    info Start monitoring operator install...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-monitoring-operator-server
+    info Finish monitoring operator install.
+  esac
+
   if [ "$COMPONENT" = "kafka-operator" ]; then
     # Here we install the CRD and CR first to avoid a bug in the operator
     info Start zookeeper operator requirements install ...
@@ -175,9 +185,11 @@ maybe_install_sidecar() {
     info Finish zookeeper operator requirements install.
 
     info Start zookeeper operator install...
-    local SIDECAR_CONTAINER_NAME=$(docker ps -q --filter name=sidecar --format '{{.Names}}')
-    docker exec -t ${SIDECAR_CONTAINER_NAME}  /stackable-scripts/install-zookeeper-operator.sh
+    local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator-server
     info Finish zookeeper operator install.
+
+
   fi
 }
 
@@ -209,7 +221,7 @@ maybe_install_monitoring() {
   #
   for AGENT_CONTAINER_NAME in $(docker ps --filter name=agent --format '{{.Names}}' | sort); do
     info "Start monitor components install in container ${AGENT_CONTAINER_NAME}..."
-    docker exec -t ${AGENT_CONTAINER_NAME}  /stackable-scripts/install-monitoring.sh
+#    docker exec -t ${AGENT_CONTAINER_NAME}  /stackable-scripts/install-monitoring.sh
     info Finish monitor components install.
   done
 }
