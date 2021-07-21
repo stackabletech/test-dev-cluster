@@ -52,7 +52,8 @@ Start the integration tests
 Supported operator integration tests:
 * ZooKeeper
 * Spark
-* Kafka
+* Kafka (no integration tests currently)
+* Monitoring (no integration tests currently)
 
 In the future `nifi`, `hdfs`, etc. will be added to the list.
 

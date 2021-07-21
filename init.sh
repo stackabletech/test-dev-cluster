@@ -37,7 +37,7 @@ check_args() {
   esac
 
   case ${COMPONENT} in
-  agent|spark-operator|zookeeper-operator|kafka-operator)
+  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator)
     ;;
    *)
     usage
@@ -75,7 +75,7 @@ write_env_file() {
     AGENT_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-  spark-operator|zookeeper-operator|kafka-operator)
+  spark-operator|zookeeper-operator|kafka-operator|monitoring-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
@@ -107,6 +107,9 @@ compose_up() {
     ;;
     zookeeper-operator|spark-operator)
       SERVICES="${SERVICES} agent operator sidecar"
+    ;;
+    monitoring-operator)
+      SERVICES="${SERVICES} agent operator"
     ;;
     kafka-operator)
       SERVICES="${SERVICES} agent operator sidecar"
@@ -213,23 +216,6 @@ maybe_install_component_reqs() {
   info Finish ${COMPONENT} requirements install.
 }
 
-maybe_install_monitoring() {
-
-  if [ "$COMPONENT" = "agent" ]; then
-    # No agent is installed here since it is mapped from the local folders.
-    return
-  fi
-
-  #
-  # Install the agent in all containers when testing an operator.
-  #
-  for AGENT_CONTAINER_NAME in $(docker ps --filter name=agent --format '{{.Names}}' | sort); do
-    info "Start monitor components install in container ${AGENT_CONTAINER_NAME}..."
-#    docker exec -t ${AGENT_CONTAINER_NAME}  /stackable-scripts/install-monitoring.sh
-    info Finish monitor components install.
-  done
-}
-
 #--------------------
 # main
 #--------------------
@@ -238,7 +224,6 @@ maybe_install_monitoring() {
   write_env_file
   compose_up
   maybe_install_agent
-  maybe_install_monitoring
   maybe_label_agent_nodes
   maybe_install_component_reqs
   maybe_install_sidecar
