@@ -13,13 +13,13 @@ Starts two containers (k3s and debian_agent_1).
 
   ./init.sh debian zookeeper-operator --scale agent=3
 
-Starts six containers (k3s, operator, debian_agent_[1,2,3], debian_sidecar_1). The sidecar conrainer runs a monitoring operator.
+Starts six containers (k3s, operator, debian_agent_[1,2,3], debian_sidecar_1). The sidecar container runs a monitoring operator.
 
 ### Dev/test the kafka operator
 
   ./init.sh debian kafka-operator
 
-Starts five containers (k3s, operator, debian_agent_1, debian_sidecar_[1,2]). One sidecar conrainer runs a monitoring operator and the other runs a zookeeper operator.
+Starts five containers (k3s, operator, debian_agent_1, debian_sidecar_[1,2]). One sidecar container runs a monitoring operator and the other runs a zookeeper operator.
 
 ## Prerequisites
 
