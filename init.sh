@@ -175,21 +175,25 @@ maybe_install_sidecar() {
     local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
     docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-monitoring-operator-server
     info Finish monitoring operator install.
-  esac
+
+    # Create CRD and simple monitoring cluster
+    info Start monitoring operator requirements install ...
+    docker exec -t k3s /stackable-scripts/apply-crd.sh monitoring-cluster
+    docker exec -t k3s /stackable-scripts/apply-cr.sh monitoring-cluster
+    info Finish monitoring operator requirements install.
+   esac
 
   if [ "$COMPONENT" = "kafka-operator" ]; then
-    # Here we install the CRD and CR first to avoid a bug in the operator
-    info Start zookeeper operator requirements install ...
-    docker exec -t k3s /stackable-scripts/apply-crd.sh zookeeper-cluster
-    docker exec -t k3s /stackable-scripts/apply-cr.sh zookeeper-cluster
-    info Finish zookeeper operator requirements install.
-
     info Start zookeeper operator install...
     local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
     docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator-server
     info Finish zookeeper operator install.
 
-
+    # Create CRD and simple zookeeper cluster
+    info Start zookeeper operator requirements install ...
+    docker exec -t k3s /stackable-scripts/apply-crd.sh zookeeper-cluster
+    docker exec -t k3s /stackable-scripts/apply-cr.sh zookeeper-cluster
+    info Finish zookeeper operator requirements install.
   fi
 }
 

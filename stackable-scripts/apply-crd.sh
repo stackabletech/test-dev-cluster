@@ -9,4 +9,7 @@ case ${SPEC_NAME} in
     zookeeper-cluster)
         kubectl apply -f /stackable-scripts/spec/zookeeper-cluster.yaml
         ;;
+    monitoring-cluster)
+        kubectl apply -f /stackable-scripts/spec/monitoring-cluster.yaml
+        ;;
 esac
