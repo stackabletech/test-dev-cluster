@@ -13,13 +13,13 @@ install_agent_package() {
   case $ID in
     debian)
       apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 16dd12f5c7a6d76a
-      echo deb https://repo.stackable.tech/repository/deb-release buster main | tee  /etc/apt/sources.list.d/stackable.list
+      echo deb https://repo.stackable.tech/repository/deb-dev buster main | tee  /etc/apt/sources.list.d/stackable.list
       apt-get update -o Dir::Etc::sourcelist="sources.list.d/stackable.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
       apt-get install -y stackable-agent
       ;;
     centos)
       # TODO: maybe add the gpg key here too
-      yum-config-manager --add-repo=https://repo.stackable.tech/repository/rpm-release/el${VERSION}/
+      yum-config-manager --add-repo=https://repo.stackable.tech/repository/rpm-dev/el${VERSION}/
       yum --disablerepo="*" --enablerepo="repo.stackable.*" update
       yum install -y stackable-agent --nogpgcheck
       ;;
