@@ -203,7 +203,7 @@ maybe_install_sidecar() {
 maybe_install_component_reqs() {
   until docker exec -t k3s kubectl cluster-info >/dev/null 2>&1; do
     warn k3s is not running yet.
-    sleep 2
+    sleep 5
   done
 
   info Start ${COMPONENT} requirements install...
