@@ -32,6 +32,14 @@ services:
       - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
       - k3s
+    ports:
+      - target: 7077
+      - target: 8001
+      - target: 8080
+      - target: 8081
+      - target: 8428
+      - target: 9090
+      - target: 9404
 
   operator:
     privileged: true

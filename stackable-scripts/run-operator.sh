@@ -13,5 +13,5 @@ COMPONENT=$(pwd | sed 's/^\///')
 
 OPERATOR_BIN_NAME=stackable-$COMPONENT-server
 
-cargo run --verbose --target-dir /build/operator --bin ${OPERATOR_BIN_NAME}
+cargo run --verbose --target-dir /build/operator --bin ${OPERATOR_BIN_NAME} -- $@
 

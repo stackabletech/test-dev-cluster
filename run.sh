@@ -16,7 +16,7 @@ test-agent)
   docker exec -t $(agent_container_name) /stackable-scripts/test-agent.sh $@
   ;;
 run-operator)
-  docker exec -t operator /stackable-scripts/run-operator.sh
+  docker exec -t operator /stackable-scripts/run-operator.sh $@
   ;;
 test-operator)
   docker exec -t operator /stackable-scripts/test-operator.sh $@

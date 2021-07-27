@@ -37,7 +37,7 @@ check_args() {
   esac
 
   case ${COMPONENT} in
-  agent|spark-operator|zookeeper-operator|kafka-operator)
+  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator)
     ;;
    *)
     usage
@@ -75,7 +75,7 @@ write_env_file() {
     AGENT_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-  spark-operator|zookeeper-operator|kafka-operator)
+  spark-operator|zookeeper-operator|kafka-operator|monitoring-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
@@ -106,10 +106,14 @@ compose_up() {
       SERVICES="${SERVICES} agent"
     ;;
     zookeeper-operator|spark-operator)
+      SERVICES="${SERVICES} agent operator sidecar"
+    ;;
+    monitoring-operator)
       SERVICES="${SERVICES} agent operator"
     ;;
     kafka-operator)
       SERVICES="${SERVICES} agent operator sidecar"
+      COMPOSE_ARGS="${COMPOSE_ARGS} --scale sidecar=2" ### one for monitoring and one for zookeeper
     ;;
   esac
   docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_ARGS} ${SERVICES}
@@ -167,24 +171,39 @@ maybe_label_agent_nodes() {
 
 maybe_install_sidecar() {
 
-  if [ "$COMPONENT" = "kafka-operator" ]; then
-    # Here we install the CRD and CR first to avoid a bug in the operator
-    info Start zookeeper operator requirements install ...
-    docker exec -t k3s /stackable-scripts/apply-crd.sh zookeeper-cluster
-    docker exec -t k3s /stackable-scripts/apply-cr.sh zookeeper-cluster
-    info Finish zookeeper operator requirements install.
+  ### Install the monitoring operator in the first sidecar container
+  case ${COMPONENT} in
+  spark-operator|zookeeper-operator|kafka-operator)
+    info Start monitoring operator install...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-monitoring-operator-server
+    info Finish monitoring operator install.
 
+    # Create CRD and simple monitoring cluster
+    info Start monitoring operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/monitoring-operator/crd/monitoringcluster.crd.yaml
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/monitoring-cluster.yaml
+    info Finish monitoring operator requirements install.
+   esac
+
+  if [ "$COMPONENT" = "kafka-operator" ]; then
     info Start zookeeper operator install...
-    local SIDECAR_CONTAINER_NAME=$(docker ps -q --filter name=sidecar --format '{{.Names}}')
-    docker exec -t ${SIDECAR_CONTAINER_NAME}  /stackable-scripts/install-zookeeper-operator.sh
+    local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator-server
     info Finish zookeeper operator install.
+
+    # Create CRD and simple zookeeper cluster
+    info Start zookeeper operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /etc/stackable/zookeeper-operator/crd/zookeepercluster.crd.yaml
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /stackable-scripts/cr/zookeeper-cluster.yaml
+    info Finish zookeeper operator requirements install.
   fi
 }
 
 maybe_install_component_reqs() {
   until docker exec -t k3s kubectl cluster-info >/dev/null 2>&1; do
     warn k3s is not running yet.
-    sleep 2
+    sleep 5
   done
 
   info Start ${COMPONENT} requirements install...

@@ -1,9 +1,9 @@
-apiVersion: zookeeper.stackable.tech/v1alpha1
-kind: ZookeeperCluster
+apiVersion: monitoring.stackable.tech/v1alpha1
+kind: MonitoringCluster
 metadata:
   name: simple
 spec:
-  version: 3.5.8
+  version: 2.28.1
   servers:
     roleGroups:
       default:
@@ -11,6 +11,7 @@ spec:
           matchLabels:
             kubernetes.io/os: stackable-linux
         replicas: 1
-        config:
-          metricsPort: 9404
+
+
+
 
