@@ -19,8 +19,8 @@ wait_for_k3s
 
 case ${COMPONENT} in
   agent)
-    /stackable-scripts/apply-crd.sh repository
-    /stackable-scripts/apply-cr.sh repository
+    kubectl apply -f /stackable-scripts/spec/repository.yaml
+    kubectl apply -f /stackable-scripts/cr/repository.yaml
     /stackable-scripts/approve-cert-request.sh
     ;;
 esac

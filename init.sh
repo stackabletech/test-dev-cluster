@@ -113,7 +113,7 @@ compose_up() {
     ;;
     kafka-operator)
       SERVICES="${SERVICES} agent operator sidecar"
-      COMPOSE_ARGS="${COMPOSE_ARGS} -scale sidecar=2" ### one for monitoring and one for zookeeper
+      COMPOSE_ARGS="${COMPOSE_ARGS} --scale sidecar=2" ### one for monitoring and one for zookeeper
     ;;
   esac
   docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_ARGS} ${SERVICES}
@@ -181,8 +181,8 @@ maybe_install_sidecar() {
 
     # Create CRD and simple monitoring cluster
     info Start monitoring operator requirements install ...
-    docker exec -t k3s /stackable-scripts/apply-crd.sh monitoring-cluster
-    docker exec -t k3s /stackable-scripts/apply-cr.sh monitoring-cluster
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/monitoring-operator/crd/monitoringcluster.crd.yaml
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/monitoring-cluster.yaml
     info Finish monitoring operator requirements install.
    esac
 
@@ -194,8 +194,8 @@ maybe_install_sidecar() {
 
     # Create CRD and simple zookeeper cluster
     info Start zookeeper operator requirements install ...
-    docker exec -t k3s /stackable-scripts/apply-crd.sh zookeeper-cluster
-    docker exec -t k3s /stackable-scripts/apply-cr.sh zookeeper-cluster
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /etc/stackable/zookeeper-operator/crd/zookeepercluster.crd.yaml
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /stackable-scripts/cr/zookeeper-cluster.yaml
     info Finish zookeeper operator requirements install.
   fi
 }
