@@ -37,7 +37,7 @@ check_args() {
   esac
 
   case ${COMPONENT} in
-  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator)
+  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator)
     ;;
    *)
     usage
@@ -55,7 +55,7 @@ Usage:
 Arguments:
 
     container-os-name: debian, centos7, centos8
-    component:         agent, zookeeper-operator, spark-operator, kafka-operator
+    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator
     compose-arguments: Optional. Example: --scale agent=3
 USAGE
 }
@@ -75,9 +75,17 @@ write_env_file() {
     AGENT_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-  spark-operator|zookeeper-operator|kafka-operator|monitoring-operator)
+  spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
+    if test ! -d ${OPERATOR_SRC_DIR}; then
+      >&2 echo "Folder not found: ${OPERATOR_SRC_DIR}"
+      exit 1
+    fi
+    if test ! -d ${OPERATOR_TESTS_SRC_DIR}; then
+      mkdir -p ${OPERATOR_TESTS_SRC_DIR}
+      echo "Created by the test-dev-cluster init.sh at $(date)" > ${OPERATOR_TESTS_SRC_DIR}/dummy
+    fi
     ;;
   esac
 
@@ -105,7 +113,7 @@ compose_up() {
     agent)
       SERVICES="${SERVICES} agent"
     ;;
-    zookeeper-operator|spark-operator)
+    zookeeper-operator|spark-operator|opa-operator)
       SERVICES="${SERVICES} agent operator sidecar"
     ;;
     monitoring-operator)
@@ -173,7 +181,7 @@ maybe_install_sidecar() {
 
   ### Install the monitoring operator in the first sidecar container
   case ${COMPONENT} in
-  spark-operator|zookeeper-operator|kafka-operator)
+  spark-operator|zookeeper-operator|kafka-operator|opa-operator)
     info Start monitoring operator install...
     local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
     docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-monitoring-operator-server

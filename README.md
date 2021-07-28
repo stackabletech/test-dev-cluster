@@ -74,10 +74,11 @@ Supported operator integration tests:
 * Spark
 * Kafka (no integration tests currently)
 * Monitoring (no integration tests currently)
+* OPA (no integration tests currently)
 
 In the future `nifi`, `hdfs`, etc. will be added to the list.
 
-This assumes that you have `xxx-operator` and `xxx-oprerator-integration-tests` repositories checked out on your developmnent system. If any of those repositories are missing, this will not work. There are no sanity checks at the moment.
+This assumes that you have `xxx-operator` and `xxx-oprerator-integration-tests` repositories checked out on your developmnent system. If the `xxx-operator` is missing the `init.sh` will abort before launching docker-compose. If the repository for integration tests is missing, an epmty folder with the same name is created.
 
 ## Notes on the Kafka operator
 
