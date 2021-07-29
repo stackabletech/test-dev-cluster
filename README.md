@@ -75,6 +75,7 @@ Supported operator integration tests:
 * Kafka (no integration tests currently)
 * Monitoring (no integration tests currently)
 * OPA (no integration tests currently)
+* NiFi (no integration tests currently)
 
 In the future `nifi`, `hdfs`, etc. will be added to the list.
 
