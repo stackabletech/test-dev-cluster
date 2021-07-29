@@ -38,6 +38,7 @@ services:
       - target: 8428
       - target: 9090
       - target: 9404
+      - target: 10000
 
   operator:
     privileged: true

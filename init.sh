@@ -75,7 +75,8 @@ write_env_file() {
     AGENT_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
-  spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator)
+  *-operator)
+  #spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     if test ! -d ${OPERATOR_SRC_DIR}; then
@@ -113,13 +114,13 @@ compose_up() {
     agent)
       SERVICES="${SERVICES} agent"
     ;;
-    zookeeper-operator|spark-operator|opa-operator|nifi-operator)
+    zookeeper-operator|spark-operator|opa-operator)
       SERVICES="${SERVICES} agent operator sidecar"
     ;;
     monitoring-operator)
       SERVICES="${SERVICES} agent operator"
     ;;
-    kafka-operator)
+    kafka-operator|nifi-operator)
       SERVICES="${SERVICES} agent operator sidecar"
       COMPOSE_ARGS="${COMPOSE_ARGS} --scale sidecar=2" ### one for monitoring and one for zookeeper
     ;;
@@ -177,11 +178,7 @@ maybe_label_agent_nodes() {
   done
 }
 
-maybe_install_sidecar() {
-
-  ### Install the monitoring operator in the first sidecar container
-  case ${COMPONENT} in
-  spark-operator|zookeeper-operator|kafka-operator|opa-operator|nifi-operator)
+sidecar_install_monitoring_operator() {
     info Start monitoring operator install...
     local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
     docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-monitoring-operator-server
@@ -192,9 +189,9 @@ maybe_install_sidecar() {
     docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/monitoring-operator/crd/monitoringcluster.crd.yaml
     docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/monitoring-cluster.yaml
     info Finish monitoring operator requirements install.
-   esac
+}
 
-  if [ "$COMPONENT" = "kafka-operator" ]; then
+sidecar_install_zookeeper_operator() {
     info Start zookeeper operator install...
     local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
     docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator-server
@@ -205,7 +202,19 @@ maybe_install_sidecar() {
     docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /etc/stackable/zookeeper-operator/crd/zookeepercluster.crd.yaml
     docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /stackable-scripts/cr/zookeeper-cluster.yaml
     info Finish zookeeper operator requirements install.
-  fi
+}
+
+maybe_install_sidecar() {
+  ### Install the monitoring operator in the first sidecar container
+  case ${COMPONENT} in
+    spark-operator|zookeeper-operator|kafka-operator|opa-operator)
+      sidecar_install_monitoring_operator
+    ;;
+    kafka-operator|nifi-operator)
+      sidecar_install_monitoring_operator
+      sidecar_install_zookeeper_operator
+    ;;
+  esac
 }
 
 maybe_install_component_reqs() {
