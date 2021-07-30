@@ -37,6 +37,7 @@ services:
       - target: 8081
       - target: 8428
       - target: 9090
+      - target: 9100
       - target: 9404
       - target: 10000
 
