@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    kubernetes.io/os: stackable-linux
+  name: node-exporter
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      kubernetes.io/os: stackable-linux
+  template:
+    metadata:
+      labels:
+        kubernetes.io/os: stackable-linux
+    spec:
+      containers:
+      - command:
+        - node_exporter-1.2.0.linux-amd64/node_exporter
+        - --web.listen-address=127.0.0.1:9100
+        - --no-collector.wifi
+        - --no-collector.hwmon
+        - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/pods/.+)($|/)
+        - --collector.netclass.ignored-devices=^(veth.*|[a-f0-9]{15})$
+        - --collector.netdev.device-exclude=^(veth.*|[a-f0-9]{15})$
+        image: node-exporter:1.2.0
+        name: node-exporter
+      hostNetwork: true
+      hostPID: true
+      nodeSelector:
+        kubernetes.io/os: stackable-linux
+      tolerations:
+        - operator: Exists
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 10%
+    type: RollingUpdate
+
