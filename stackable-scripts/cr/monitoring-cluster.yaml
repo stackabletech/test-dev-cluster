@@ -16,4 +16,5 @@ spec:
           scrapeTimeout: 5s
           evaluationInterval: 10s
           scheme: http
+          cliArgs: []
 
