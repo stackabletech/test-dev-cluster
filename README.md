@@ -1,6 +1,8 @@
 This repository contains a collection of scripts that help developers of Stackable components (agent, operators, etc.) to
 perform integration tests locally. For this purpose it sets up several Docker containers.
 
+NOTE: This will only work if the host system is running systemd 247 or below, 248 and later will **not** work.
+
 ## Example usecase
 
 ### Dev/Test the agent
@@ -26,6 +28,9 @@ Starts five containers (k3s, operator, debian_agent_1, debian_sidecar_[1,2]). On
 * All Stackable repos that are to be tested are checked out under the same root.
 * The host (development) machine has /sys/fs/cgroups
 * Use docker version >= 20 and docker-compose version >= 1.29
+* systemd 248 and later will **not** (currently) work (tested up until systemd 249)
+  * https://github.com/moby/moby/issues/42275
+  * https://github.com/systemd/systemd/issues/19245
 
 ## Docker images
 
