@@ -207,7 +207,7 @@ sidecar_install_zookeeper_operator() {
 maybe_install_sidecar() {
   ### Install the monitoring operator in the first sidecar container
   case ${COMPONENT} in
-    spark-operator|zookeeper-operator|kafka-operator|opa-operator)
+    spark-operator|zookeeper-operator|opa-operator)
       sidecar_install_monitoring_operator
     ;;
     kafka-operator|nifi-operator)
