@@ -11,7 +11,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y \
  apt-utils procps curl build-essential pkg-config liblzma-dev libssl-dev libsystemd-dev \
- systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre
+ systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre sudo
 
 #------------------------------------------------------------------------------
 # Add K8S repository for kubectl
@@ -59,12 +59,14 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
     /lib/systemd/system/systemd-update-utmp*
 
 #------------------------------------------------------------------------------
+# Stackable user
+#------------------------------------------------------------------------------
+RUN addgroup stackable \
+  && adduser --system --disabled-password --ingroup stackable stackable
+
+#------------------------------------------------------------------------------
 # Install Rust
 #------------------------------------------------------------------------------
-#RUN useradd -ms /bin/bash stackable
-#USER stackable:stackable
-#WORKDIR /home/stackable
-
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
  && . $HOME/.cargo/env \
  && cargo install cargo-deb \

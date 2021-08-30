@@ -8,7 +8,7 @@ COPY centos/kubernetes.repo  /etc/yum.repos.d/kubernetes.repo
 #------------------------------------------------------------------------------
 RUN yum -y update \
     && yum install -y yum-utils curl gcc make pkg-config openssl-devel systemd-devel \
-    kubectl vim java-11-openjdk python3 rpm-build jq
+    kubectl vim java-11-openjdk python3 rpm-build jq sudo
  
 #------------------------------------------------------------------------------
 # Configure systemd.
@@ -33,6 +33,10 @@ RUN rm -f           \
     /etc/machine-id \
     /var/lib/dbus/machine-id
 
+#------------------------------------------------------------------------------
+# Stackable user
+#------------------------------------------------------------------------------
+RUN useradd --system --user-group stackable
 #------------------------------------------------------------------------------
 # Install Rust
 #------------------------------------------------------------------------------
