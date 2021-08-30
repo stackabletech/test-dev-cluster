@@ -25,3 +25,8 @@ apt-get clean \
     /var/log/apt/term.log         \
     /var/log/dpkg.log
 
+#------------------------------------------------------------------------------
+# Stackable user
+#------------------------------------------------------------------------------
+addgroup stackable \
+  && adduser --system --disabled-password --ingroup stackable stackable
