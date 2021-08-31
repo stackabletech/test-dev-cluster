@@ -30,3 +30,5 @@ apt-get clean \
 #------------------------------------------------------------------------------
 addgroup stackable \
   && adduser --system --disabled-password --ingroup stackable stackable
+
+echo "export KUBECONFIG=/rancher/k3s.yml" >> /etc/bash.bashrc
