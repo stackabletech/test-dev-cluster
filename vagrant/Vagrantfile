@@ -43,9 +43,11 @@ Vagrant.configure("2") do |config|
       end
 
       vm.vm.synced_folder "rancher", "/rancher", SharedFoldersEnableSymlinksCreate: false
+      vm.vm.synced_folder "provision", "/provision", SharedFoldersEnableSymlinksCreate: false
 
       vm.vm.provision "shell", path: "provision/debian10/common.sh"
       vm.vm.provision "shell", path: "provision/debian10/agent.sh"
+      vm.vm.provision "shell", path: "provision/debian10/start-agent.sh", run: 'always'
 
       vm.vm.network "forwarded_port", guest: 7077, host: 7077, auto_correct: true
       vm.vm.network "forwarded_port", guest: 8001, host: 8001, auto_correct: true

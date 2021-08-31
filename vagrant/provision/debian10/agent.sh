@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
+
 
 [ -d /var/log/stackable/servicelogs ] || mkdir -p /var/log/stackable/servicelogs
 exec >> /var/log/stackable/servicelogs/testmessages
@@ -38,10 +39,9 @@ install_service_environment() {
 
   tee /etc/systemd/system/stackable-agent.service.d/override.conf > /dev/null <<EOF
 [Service]
-Environment="KUBECONFIG=/rancher/k3s.yaml"
+Environment="KUBECONFIG=/rancher/k3s.yml"
 EOF
 }
-
 
 #--------------------
 # main
@@ -49,6 +49,5 @@ EOF
 {
   install_agent_package
   install_service_environment
-  systemctl start stackable-agent
 }
 
