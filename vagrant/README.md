@@ -8,7 +8,7 @@
 ## Usage
 
     # start a cluster
-    ./init.sh debian kafka-operator
+    ./init.sh debian10 kafka-operator
 
     # login into the operator VM and become root
     vagrant ssh operator
