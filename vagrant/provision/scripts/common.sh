@@ -53,7 +53,7 @@ install_centos_packages() {
   #------------------------------------------------------------------------------
   useradd --system --user-group stackable
 
-  echo "export KUBECONFIG=/rancher/k3s.yml" >> /etc/bash.bashrc
+  echo "export KUBECONFIG=/rancher/k3s.yml" > /etc/profile.d/kubeconfig.sh
 }
 #------------------------------------------------------------------------------
 # main

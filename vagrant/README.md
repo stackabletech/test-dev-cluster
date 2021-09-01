@@ -7,8 +7,8 @@
 
 ## Usage
 
-    # start a cluster
-    ./init.sh debian10 kafka-operator
+    # start a cluster with 3 nodes
+    ./init.sh debian10 kafka-operator 3
 
     # login into the operator VM and become root
     vagrant ssh operator
@@ -50,7 +50,7 @@ The `rancher` sub-folder is mounted on all vms and contains the K8S configuratio
 
 ### VirtualBox and secure boot
 
-Systems with secure boot enabled cannt load VirtualBox drivers because they are not signed. Possible solutions are:
+Systems with secure boot enabled cannot load VirtualBox drivers because they are not signed. Possible solutions are:
 * sign drivers (how?)
 * disable secure boot
 
