@@ -2,6 +2,8 @@
 
 set +x
 
+NODE_ID=$1
+
 export KUBECONFIG=/rancher/k3s.yml
 
 wait_for_k3s() {
@@ -31,6 +33,10 @@ approve_cert_request() {
   done
 }
 
+label_k8s_node() {
+  kubectl label node "node${NODE_ID}" node=${NODE_ID}
+}
+
 #--------------------
 # main
 #--------------------
@@ -38,5 +44,6 @@ approve_cert_request() {
   install_crds
   systemctl start stackable-agent
   approve_cert_request
+  label_k8s_node
 }
 

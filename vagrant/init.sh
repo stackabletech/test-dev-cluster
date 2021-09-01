@@ -59,9 +59,9 @@ Arguments:
 USAGE
 }
 
-write_env_file() {
+write_conf_file() {
 
-  local ENV_FILE=.env
+  local ENV_FILE=conf.rb
 
   local STACKABLE_SCRIPTS_DIR=${PARENT_DIR}/test-dev-cluster/stackable-scripts
   local AGENT_SRC_DIR=dummy
@@ -90,13 +90,13 @@ write_env_file() {
   esac
 
     tee ${ENV_FILE}  > /dev/null <<EOF
-CONTAINER_OS_NAME=${CONTAINER_OS_NAME}
-STACKABLE_SCRIPTS_DIR=${STACKABLE_SCRIPTS_DIR}
-AGENT_SRC_DIR=${AGENT_SRC_DIR}
-AGENT_TESTS_SRC_DIR=${AGENT_TESTS_SRC_DIR}
-OPERATOR_SRC_DIR=${OPERATOR_SRC_DIR}
-OPERATOR_TESTS_SRC_DIR=${OPERATOR_TESTS_SRC_DIR}
-COMPONENT=${COMPONENT}
+CONTAINER_OS_NAME="${CONTAINER_OS_NAME}"
+STACKABLE_SCRIPTS_DIR="${STACKABLE_SCRIPTS_DIR}"
+AGENT_SRC_DIR="${AGENT_SRC_DIR}"
+AGENT_TESTS_SRC_DIR="${AGENT_TESTS_SRC_DIR}"
+OPERATOR_SRC_DIR="${OPERATOR_SRC_DIR}"
+OPERATOR_TESTS_SRC_DIR="${OPERATOR_TESTS_SRC_DIR}"
+COMPONENT="${COMPONENT}"
 EOF
 
  }
@@ -234,10 +234,6 @@ maybe_install_component_reqs() {
 
 
 vagrant_up() {
-  for VAR in $(cat .env); do
-    export $VAR
-  done
-
   vagrant up
 }
 
@@ -246,7 +242,7 @@ vagrant_up() {
 #--------------------
 {
   check_args
-  write_env_file
+  write_conf_file
   vagrant_up
 #  maybe_install_agent
 #  maybe_label_agent_nodes

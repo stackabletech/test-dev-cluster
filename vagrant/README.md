@@ -23,6 +23,13 @@
     # stop the cluster
     ./clean.sh
 
+    # destroy the cluster
+    ./clean.sh destroy
+
+    # suspend cluster
+    ./clean.sh suspend
+
+
 ## operator VM
 
 * cargo is installed under /root/.cargo
