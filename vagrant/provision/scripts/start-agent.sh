@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set +x
 
 NODE_ID=$1
@@ -34,7 +33,7 @@ approve_cert_request() {
 }
 
 label_k8s_node() {
-  kubectl label node "node${NODE_ID}" node=${NODE_ID}
+  kubectl label node --overwrite "node${NODE_ID}" node=${NODE_ID}
 }
 
 #--------------------
