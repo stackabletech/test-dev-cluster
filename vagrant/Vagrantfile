@@ -32,66 +32,88 @@ Vagrant.configure("2") do |config|
 
   end
 
-  ###
-  ### Stackable agent
-  ###
-  (1..NODE_COUNT).each do |n|
-    config.vm.define "node#{n}" do |vm|
-      vm.vm.hostname = "node#{n}"
+  if COMPONENT == "agent" then
+    config.vm.define "agent-#{CONTAINER_OS_NAME}" do |vm|
+      vm.vm.hostname = "agent-#{CONTAINER_OS_NAME}"
       vm.vm.box = AGENT_BASE_BOX
       
       vm.vm.provider "virtualbox" do |vb|
-        vb.name = "node#{n}"
+        vb.name = "agent-#{CONTAINER_OS_NAME}"
         vb.gui = false
         vb.memory = "1024"
       end
 
       vm.vm.synced_folder "rancher", "/rancher", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
       vm.vm.synced_folder "provision", "/provision", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
+      vm.vm.synced_folder AGENT_SRC_DIR, "/#{COMPONENT}", SharedFoldersEnableSymlinksCreate: false
+      vm.vm.synced_folder AGENT_TESTS_SRC_DIR, "/#{COMPONENT}-integration-tests", SharedFoldersEnableSymlinksCreate: false
+
+        vm.vm.provision "shell", path: "provision/scripts/common.sh"
+        vm.vm.provision "shell", path: "provision/scripts/rust.sh"
+    end
+  end
+   
+  if COMPONENT != "agent" then
+    ###
+    ### Stackable agent
+    ###
+    (1..NODE_COUNT).each do |n|
+      config.vm.define "node#{n}" do |vm|
+        vm.vm.hostname = "node#{n}"
+        vm.vm.box = AGENT_BASE_BOX
+        
+        vm.vm.provider "virtualbox" do |vb|
+          vb.name = "node#{n}"
+          vb.gui = false
+          vb.memory = "1024"
+        end
+
+        vm.vm.synced_folder "rancher", "/rancher", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
+        vm.vm.synced_folder "provision", "/provision", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
+
+        vm.vm.provision "shell", path: "provision/scripts/common.sh"
+        vm.vm.provision "shell", path: "provision/scripts/agent.sh"
+        vm.vm.provision "shell", path: "provision/scripts/start-agent.sh", run: 'always', args: [n]
+
+        vm.vm.network "forwarded_port", guest: 7077, host: 7077, auto_correct: true
+        vm.vm.network "forwarded_port", guest: 8001, host: 8001, auto_correct: true
+        vm.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
+        vm.vm.network "forwarded_port", guest: 8081, host: 8081, auto_correct: true
+        vm.vm.network "forwarded_port", guest: 8428, host: 8428, auto_correct: true
+        vm.vm.network "forwarded_port", guest: 9090, host: 9090, auto_correct: true
+        vm.vm.network "forwarded_port", guest: 9404, host: 9404, auto_correct: true
+        vm.vm.network "forwarded_port", guest: 10000, host: 10000, auto_correct: true
+      end
+    end
+
+    ###
+    ### Operator
+    ###
+    config.vm.define "operator" do |vm|
+      vm.vm.hostname = "operator"
+      vm.vm.box = OPERATOR_BASE_BOX
+      
+      vm.vm.provider "virtualbox" do |vb|
+        vb.name = "operator"
+        vb.gui = false
+        vb.memory = "1024"
+      end
+
+      vm.vm.synced_folder "rancher", "/rancher", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
+      vm.vm.synced_folder "provision", "/provision", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
+      vm.vm.synced_folder OPERATOR_SRC_DIR, "/#{COMPONENT}", SharedFoldersEnableSymlinksCreate: false
+      vm.vm.synced_folder OPERATOR_TESTS_SRC_DIR, "/#{COMPONENT}-integration-tests", SharedFoldersEnableSymlinksCreate: false
 
       vm.vm.provision "shell", path: "provision/scripts/common.sh"
-      vm.vm.provision "shell", path: "provision/scripts/agent.sh"
-      vm.vm.provision "shell", path: "provision/scripts/start-agent.sh", run: 'always', args: [n]
+      vm.vm.provision "shell", path: "provision/scripts/rust.sh"
 
-      vm.vm.network "forwarded_port", guest: 7077, host: 7077, auto_correct: true
-      vm.vm.network "forwarded_port", guest: 8001, host: 8001, auto_correct: true
-      vm.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
-      vm.vm.network "forwarded_port", guest: 8081, host: 8081, auto_correct: true
-      vm.vm.network "forwarded_port", guest: 8428, host: 8428, auto_correct: true
-      vm.vm.network "forwarded_port", guest: 9090, host: 9090, auto_correct: true
-      vm.vm.network "forwarded_port", guest: 9404, host: 9404, auto_correct: true
-      vm.vm.network "forwarded_port", guest: 10000, host: 10000, auto_correct: true
+      #
+      # Install ZK for tools that require it.
+      #
+      if COMPONENT == "kafka-operator" || COMPONENT == "nifi-operator" then
+        vm.vm.provision "shell", path: "provision/scripts/operator.sh", args: ["zookeeper-operator"]
+      end
     end
   end
+end
 
-  ###
-  ### Operator
-  ###
-  config.vm.define "operator" do |vm|
-    vm.vm.hostname = "operator"
-    vm.vm.box = OPERATOR_BASE_BOX
-    
-    vm.vm.provider "virtualbox" do |vb|
-      vb.name = "operator"
-      vb.gui = false
-      vb.memory = "1024"
-    end
-
-    vm.vm.synced_folder "rancher", "/rancher", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
-    vm.vm.synced_folder "provision", "/provision", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
-    vm.vm.synced_folder OPERATOR_SRC_DIR, "/#{COMPONENT}", SharedFoldersEnableSymlinksCreate: false
-    vm.vm.synced_folder OPERATOR_TESTS_SRC_DIR, "/#{COMPONENT}-integration-tests", SharedFoldersEnableSymlinksCreate: false
-
-    vm.vm.provision "shell", path: "provision/scripts/common.sh"
-    vm.vm.provision "shell", path: "provision/scripts/rust.sh"
-
-    #
-    # Install ZK for tools that require it.
-    #
-    if COMPONENT == "kafka-operator" || COMPONENT == "nifi-operator" then
-      vm.vm.provision "shell", path: "provision/scripts/operator.sh", args: ["zookeeper-operator"]
-    end
-
-
-  end
- end
