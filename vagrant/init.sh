@@ -104,7 +104,7 @@ EOF
  }
 
 vagrant_up() {
-  vagrant up
+  vagrant up --provider=virtualbox
 }
 
 #--------------------

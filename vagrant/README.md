@@ -33,19 +33,23 @@
 ## agent VM
 
 * the VMs are prefix with operating system name (to support multiple OSes running in parallel)
-    vagrant ssh agent-debian10
+    vagrant ssh k3s
 * you can start multiple agent VMs with different OSes but the cleanup script will only clean up the last environment that was created
 * cargo is installed under /root/.cargo and is in root's PATH
 * become `root` to build and run operators and tests:
 
     sudo su -
+    # create crds
+    kubectl apply -f /provision/spec/repository.yaml
+    kubectl apply -f /provision/cr/repository.yaml
+
     # run the agent
     cd /agent
-    cargo run --target-dir /build/agent --bin stackable-agent
+    cargo run --target-dir /build/agent --bin stackable-agent -- --hostname=localhost
 
     # run the agent tests
     cd /agent-integration-tests
-    cargo test --target-dir /build/agent-integration-tests
+    cargo test --target-dir /build/agent-integration-tests -- --nocapture --test-threads=1
 
 * agent source is mounted under /agent
 * agent tests source is also mounted under /agent-integration-tests
@@ -69,6 +73,17 @@ Started with all optional features disabled.
 The `rancher` sub-folder is mounted on all vms and contains the K8S configuration file that is exported by `k3s` at provisioning time.
 
 ## Issues
+
+### Cleaning and reusing VMs
+
+When starting a new environment from a power off state without provisioning, the agent's csr might need to be cleared and approved again:
+
+    kubectl delete csr localhost-tls
+    kubectl certificate approve localhost-tls
+
+### K8S Log streaming
+
+* K8S log streaming from node VMs doesn't work because k3s cannot resolve the hostnames of those VMs. 
 
 ### VirtualBox and secure boot
 

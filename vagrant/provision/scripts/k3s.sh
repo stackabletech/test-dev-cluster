@@ -20,6 +20,7 @@ apt-get clean \
 
 curl -sfL https://get.k3s.io | sh -s - \
   --bind-address 192.168.33.10 \
+  --node-external-ip 192.168.33.10 \
   --disable coredns \
   --disable servicelb \
   --disable traefik \
@@ -27,7 +28,6 @@ curl -sfL https://get.k3s.io | sh -s - \
   --disable metrics-server \
   --disable-cloud-controller \
   --disable-network-policy \
-  --disable-scheduler \
   --write-kubeconfig /rancher/k3s.yml \
   --kube-controller-manager-arg cluster-signing-cert-file= \
   --kube-controller-manager-arg cluster-signing-key-file= \
