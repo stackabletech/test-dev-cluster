@@ -11,7 +11,7 @@
     ./init.sh debian10 kafka-operator 3
 
     # login into the operator VM and become root
-    vagrant ssh operator
+    vagrant ssh operator-debian10
     sudo su -
 
     # run the kafka operator
@@ -33,7 +33,7 @@
 ## agent VM
 
 * the VMs are prefix with operating system name (to support multiple OSes running in parallel)
-    vagrant ssh k3s
+    vagrant ssh k3s-debian10
 * you can start multiple agent VMs with different OSes but the cleanup script will only clean up the last environment that was created
 * cargo is installed under /root/.cargo and is in root's PATH
 * become `root` to build and run operators and tests:
@@ -60,7 +60,7 @@
 * cargo is installed under /root/.cargo and is in root's PATH
 * become `root` to build and run operators and tests:
 
-    vagrant ssh operator
+    vagrant ssh operator-debian10
     sudo su -
 * operator source is mounted under /xxx-operator
 * operator tests source is also mounted under /xxx-operator-integration-tests

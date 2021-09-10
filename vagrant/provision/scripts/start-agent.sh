@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set +x
 
-NODE_ID=$1
+NODE_NAME=$1
+NODE_ID=$2
 
 export KUBECONFIG=/rancher/k3s.yml
 
@@ -33,7 +34,7 @@ approve_cert_request() {
 }
 
 label_k8s_node() {
-  kubectl label node --overwrite "node${NODE_ID}" node=${NODE_ID}
+  kubectl label node --overwrite ${NODE_NAME} node=${NODE_ID}
 }
 
 #--------------------
