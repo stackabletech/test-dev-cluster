@@ -15,7 +15,7 @@
     sudo su -
 
     # run the kafka operator
-    cd /kafka-operator && cargo run --verbose --target-dir /build/operator --bin stackable-kafka-operator-server
+    cd /kafka-operator && cargo run --verbose --target-dir /build/operator --bin stackable-kafka-operator
 
     # run the kafka operator integration tests
     cd /kafka-operator-integration-tests && cargo test --target-dir /build/tests -- --nocapture --test-threads=1 

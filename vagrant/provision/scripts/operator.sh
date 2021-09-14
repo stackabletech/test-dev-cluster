@@ -2,7 +2,7 @@
 
 
 OPERATOR_NAME=${1:-zookeeper-operator}
-OPERATOR_PACKAGE_NAME="stackable-${OPERATOR_NAME}-server"
+OPERATOR_PACKAGE_NAME="stackable-${OPERATOR_NAME}"
 
 export KUBECONFIG=/rancher/k3s.yml
 
