@@ -181,7 +181,7 @@ maybe_label_agent_nodes() {
 sidecar_install_monitoring_operator() {
     info Start monitoring operator install...
     local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
-    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-monitoring-operator-server
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-monitoring-operator
     info Finish monitoring operator install.
 
     # Create CRD and simple monitoring cluster
@@ -194,7 +194,7 @@ sidecar_install_monitoring_operator() {
 sidecar_install_zookeeper_operator() {
     info Start zookeeper operator install...
     local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
-    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator-server
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator
     info Finish zookeeper operator install.
 
     # Create CRD and simple zookeeper cluster

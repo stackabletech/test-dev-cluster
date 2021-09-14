@@ -11,7 +11,7 @@ source ${HOME}/.cargo/env
 RUST_LOG=info
 COMPONENT=$(pwd | sed 's/^\///')
 
-OPERATOR_BIN_NAME=stackable-$COMPONENT-server
+OPERATOR_BIN_NAME=stackable-$COMPONENT
 
 cargo run --verbose --target-dir /build/operator --bin ${OPERATOR_BIN_NAME} -- $@
 

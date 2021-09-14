@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OPERATOR_NAME=${1:-stackable-zookeeper-operator-server}
+OPERATOR_NAME=${1:-stackable-zookeeper-operator}
 
 set -e
 
