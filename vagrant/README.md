@@ -32,7 +32,7 @@
 
 ## agent VM
 
-* the VMs are prefix with operating system name (to support multiple OSes running in parallel)
+* the VMs are suffixed with operating system name (to support multiple OSes running in parallel)
     vagrant ssh k3s-debian10
 * you can start multiple agent VMs with different OSes but the cleanup script will only clean up the last environment that was created
 * cargo is installed under /root/.cargo and is in root's PATH
@@ -45,7 +45,7 @@
 
     # run the agent
     cd /agent
-    cargo run --target-dir /build/agent --bin stackable-agent -- --hostname=localhost
+    cargo run --target-dir /build/agent --bin stackable-agent -- --hostname=localhost --server-bind-ip=127.0.0.1
 
     # run the agent tests
     cd /agent-integration-tests
