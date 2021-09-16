@@ -14,7 +14,7 @@ cargo test --target-dir /build/${COMPONENT}-integration-tests -- --nocapture --t
 
 # TODO: maybe this is not wanted. Leave it to the developer to decide.
 # kill the operator to prepare for possible code changes.
-# OPERATOR_BIN_NAME=stackable-$COMPONENT-server
+# OPERATOR_BIN_NAME=stackable-$COMPONENT
 # OPERATOR_PID=$(ps -u | grep ${OPERATOR_BIN_NAME} | grep -v grep | awk '{print $2}')
 # if [ "${OPERATOR_PID}" != "" ]; then
 #   kill -term ${OPERATOR_PID}
