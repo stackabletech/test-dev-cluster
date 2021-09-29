@@ -4,7 +4,7 @@ set -e
 
 CONTAINER_OS_NAME=${1}
 COMPONENT=${2}
-VM_NODE_COUNT="1"
+VM_NODE_COUNT=${3:-1}
 
 PARENT_DIR=$(dirname $(dirname $(pwd)))
 
