@@ -187,6 +187,7 @@ sidecar_install_monitoring_operator() {
     # Create CRD and simple monitoring cluster
     info Start monitoring operator requirements install ...
     docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/monitoring-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/monitoring-cluster.yaml
     info Finish monitoring operator requirements install.
 }
 
@@ -199,6 +200,7 @@ sidecar_install_zookeeper_operator() {
     # Create CRD and simple zookeeper cluster
     info Start zookeeper operator requirements install ...
     docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /etc/stackable/zookeeper-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /stackable-scripts/cr/zookeeper-cluster.yaml
     info Finish zookeeper operator requirements install.
 }
 
