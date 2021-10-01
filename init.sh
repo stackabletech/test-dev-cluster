@@ -37,7 +37,7 @@ check_args() {
   esac
 
   case ${COMPONENT} in
-  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator)
+  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator)
     ;;
    *)
     usage
@@ -55,7 +55,7 @@ Usage:
 Arguments:
 
     container-os-name: debian, centos7, centos8
-    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator, nifi-operator
+    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator, nifi-operator, hdfs-operator, hbase-operator, trino-operator
     compose-arguments: Optional. Example: --scale agent=3
 USAGE
 }
@@ -76,7 +76,7 @@ write_env_file() {
     AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
   *-operator)
-  #spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator)
+  #spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     if test ! -d ${OPERATOR_SRC_DIR}; then
@@ -114,7 +114,7 @@ compose_up() {
     agent)
       SERVICES="${SERVICES} agent"
     ;;
-    zookeeper-operator|spark-operator|opa-operator)
+    zookeeper-operator|spark-operator|opa-operator|hdfs-operator|hbase-operator|trino-operator)
       SERVICES="${SERVICES} agent operator sidecar"
     ;;
     monitoring-operator)
@@ -186,7 +186,7 @@ sidecar_install_monitoring_operator() {
 
     # Create CRD and simple monitoring cluster
     info Start monitoring operator requirements install ...
-    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/monitoring-operator/crd/monitoringcluster.crd.yaml
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/monitoring-operator/crd
     docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/monitoring-cluster.yaml
     info Finish monitoring operator requirements install.
 }
@@ -199,7 +199,7 @@ sidecar_install_zookeeper_operator() {
 
     # Create CRD and simple zookeeper cluster
     info Start zookeeper operator requirements install ...
-    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /etc/stackable/zookeeper-operator/crd/zookeepercluster.crd.yaml
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /etc/stackable/zookeeper-operator/crd
     docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /stackable-scripts/cr/zookeeper-cluster.yaml
     info Finish zookeeper operator requirements install.
 }
@@ -244,6 +244,6 @@ maybe_install_component_reqs() {
   maybe_label_agent_nodes
   maybe_install_component_reqs
   maybe_install_sidecar
-  prepare_install_kubeconfig
+  #prepare_install_kubeconfig
 }
 
