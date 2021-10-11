@@ -11,7 +11,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y \
  apt-utils procps curl build-essential pkg-config liblzma-dev libssl-dev libsystemd-dev \
- systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre
+ systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre python3
+
+#------------------------------------------------------------------------------
+# Make python3 the default python
+#------------------------------------------------------------------------------
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 #------------------------------------------------------------------------------
 # Add K8S repository for kubectl

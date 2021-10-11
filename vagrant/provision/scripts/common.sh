@@ -7,7 +7,12 @@ install_debian_packages() {
   apt-get update \
   && apt-get install -y \
   apt-utils procps curl build-essential pkg-config liblzma-dev libssl-dev libsystemd-dev \
-  systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre
+  systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre python3
+
+  #------------------------------------------------------------------------------
+  # Make python3 the default python
+  #------------------------------------------------------------------------------
+  update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
   #------------------------------------------------------------------------------
   # Add K8S repository for kubectl
@@ -46,8 +51,13 @@ install_centos_packages() {
   #------------------------------------------------------------------------------
   yum -y update \
       && yum install -y yum-utils curl gcc make pkg-config openssl-devel systemd-devel \
-      kubectl vim java-11-openjdk python3 rpm-build jq
+      kubectl vim java-11-openjdk python3 rpm-build jq python39
  
+  #------------------------------------------------------------------------------
+  # Make python3 the default python
+  #------------------------------------------------------------------------------
+  alternatives --set python /usr/bin/python3.9
+
   #------------------------------------------------------------------------------
   # Stackable user
   #------------------------------------------------------------------------------
