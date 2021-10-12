@@ -4,6 +4,7 @@
 
 * VirtualBox (see Issues below)
 * Vagrant
+* Vagrant hosts plugin from https://github.com/oscar-stack/vagrant-hosts
 
 ## Usage
 

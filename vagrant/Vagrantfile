@@ -14,10 +14,11 @@ Vagrant.configure("2") do |config|
   ### k3s
   ###
   config.vm.define "k3s-#{CONTAINER_OS_NAME}" do |vm|
-    vm.vm.hostname = "k3s-#{CONTAINER_OS_NAME}"
     vm.vm.box = AGENT_BASE_BOX
+    vm.vm.hostname = "k3s-#{CONTAINER_OS_NAME}"
     vm.vm.network :private_network, ip: "192.168.33.10"
-    
+    vm.vm.provision :hosts, :sync_hosts => true
+
     vm.vm.provider "virtualbox" do |vb|
       vb.name = "k3s-#{CONTAINER_OS_NAME}"
       vb.gui = false
@@ -33,12 +34,6 @@ Vagrant.configure("2") do |config|
     vm.vm.synced_folder "rancher", "/rancher", SharedFoldersEnableSymlinksCreate: false
 
     vm.vm.provision "shell", path: "provision/scripts/k3s.sh"
-    #
-    # reset k3s on each start
-    # TODO: look into why it breaks k3s
-    #vm.vm.provision "shell", inline: "/bin/sh /usr/local/bin/k3s-killall.sh", run: "always"
-
-#    vm.vm.network "forwarded_port", guest: 6443, host: 6443
 
     if COMPONENT == "agent" then
         vm.vm.synced_folder "provision", "/provision", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
@@ -50,16 +45,18 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  
+
   if COMPONENT != "agent" then
     ###
     ### Stackable agent
     ###
     (1..NODE_COUNT).each do |n|
       config.vm.define "node#{n}-#{CONTAINER_OS_NAME}" do |vm|
-        vm.vm.hostname = "node#{n}-#{CONTAINER_OS_NAME}"
         vm.vm.box = AGENT_BASE_BOX
-        
+        vm.vm.hostname = "node#{n}-#{CONTAINER_OS_NAME}"
+        vm.vm.network :private_network, ip: "192.168.33.#{20+n}"
+        vm.vm.provision :hosts, :sync_hosts => true
+
         vm.vm.provider "virtualbox" do |vb|
           vb.name = "node#{n}-#{CONTAINER_OS_NAME}"
           vb.gui = false
@@ -90,7 +87,7 @@ Vagrant.configure("2") do |config|
     config.vm.define "operator-#{CONTAINER_OS_NAME}" do |vm|
       vm.vm.hostname = "operator-#{CONTAINER_OS_NAME}"
       vm.vm.box = OPERATOR_BASE_BOX
-      
+
       vm.vm.provider "virtualbox" do |vb|
         vb.name = "operator-#{CONTAINER_OS_NAME}"
         vb.gui = false
@@ -115,7 +112,7 @@ Vagrant.configure("2") do |config|
       # Install trino requirements
       #
       if COMPONENT == "trino-operator" then
-        vm.vm.provision "shell", path: "provision/scripts/operator.sh", args: ["zookeeper-operator"]
+        vm.vm.provision "shell", path: "provision/scripts/operator.sh", args: ["monitoring-operator"]
         vm.vm.provision "shell", path: "provision/scripts/install-trino-cli.sh"
       end
      end
