@@ -19,6 +19,11 @@ RUN apt-get update \
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 #------------------------------------------------------------------------------
+# Install k9s
+#------------------------------------------------------------------------------
+RUN curl -L https://github.com/derailed/k9s/releases/download/v0.24.15/k9s_Linux_x86_64.tar.gz | tar -xzC /usr/local/bin
+
+#------------------------------------------------------------------------------
 # Add K8S repository for kubectl
 #------------------------------------------------------------------------------
 RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg \

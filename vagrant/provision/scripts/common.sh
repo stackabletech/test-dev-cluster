@@ -65,11 +65,18 @@ install_centos_packages() {
 
   echo "export KUBECONFIG=/rancher/k3s.yml" > /etc/profile.d/kubeconfig.sh
 }
+
+function install_k9s() {
+  curl -L https://github.com/derailed/k9s/releases/download/v0.24.15/k9s_Linux_x86_64.tar.gz | tar -xzC /usr/local/bin
+}
+
 #------------------------------------------------------------------------------
 # main
 #------------------------------------------------------------------------------
 {
   [ -f /etc/os-release ] && . /etc/os-release
+
+  install_k9s
 
   case $ID in
     debian)

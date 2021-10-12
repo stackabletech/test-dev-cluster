@@ -16,6 +16,12 @@ RUN yum -y update \
 RUN alternatives --set python /usr/bin/python3.9
 
 #------------------------------------------------------------------------------
+# Install k9s
+#------------------------------------------------------------------------------
+RUN curl -L https://github.com/derailed/k9s/releases/download/v0.24.15/k9s_Linux_x86_64.tar.gz | tar -xzC /usr/local/bin
+
+
+#------------------------------------------------------------------------------
 # Configure systemd.
 #------------------------------------------------------------------------------
 RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
