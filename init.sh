@@ -178,6 +178,13 @@ maybe_label_agent_nodes() {
   done
 }
 
+install_trino_client() {
+    info Start trino client installation ...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=operator --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-trino-cli.sh 
+    info done.
+}
+
 sidecar_install_monitoring_operator() {
     info Start monitoring operator install...
     local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
@@ -207,12 +214,16 @@ sidecar_install_zookeeper_operator() {
 maybe_install_sidecar() {
   ### Install the monitoring operator in the first sidecar container
   case ${COMPONENT} in
-    spark-operator|zookeeper-operator|opa-operator|trino-operator)
+    spark-operator|zookeeper-operator|opa-operator)
       sidecar_install_monitoring_operator
     ;;
     kafka-operator|nifi-operator)
       sidecar_install_monitoring_operator
       sidecar_install_zookeeper_operator
+    ;;
+    trino-operator)
+      sidecar_install_monitoring_operator
+      install_trino_client
     ;;
   esac
 }
