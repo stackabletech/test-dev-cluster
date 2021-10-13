@@ -37,7 +37,7 @@ check_args() {
   esac
 
   case ${COMPONENT} in
-  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator)
+  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator|hive-operator|hdfs-operator|hbase-operator)
     ;;
    *)
     usage
@@ -55,7 +55,7 @@ Usage:
 Arguments:
 
     container-os-name: debian, centos7, centos8
-    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator, nifi-operator, hdfs-operator, hbase-operator, trino-operator
+    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator, nifi-operator, hdfs-operator, hbase-operator, trino-operator, hive-operator, hdfs-operator, hbase-operator
     compose-arguments: Optional. Example: --scale agent=3
 USAGE
 }
@@ -76,7 +76,7 @@ write_env_file() {
     AGENT_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     ;;
   *-operator)
-  #spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator)
+  #spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator|hive-operator|hdfs-operator|hbase-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
     OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
     if test ! -d ${OPERATOR_SRC_DIR}; then
@@ -120,7 +120,7 @@ compose_up() {
     monitoring-operator)
       SERVICES="${SERVICES} agent operator"
     ;;
-    kafka-operator|nifi-operator)
+    kafka-operator|nifi-operator|hive-operator|hdfs-operator|hbase-operator)
       SERVICES="${SERVICES} agent operator sidecar"
       COMPOSE_ARGS="${COMPOSE_ARGS} --scale sidecar=2" ### one for monitoring and one for zookeeper
     ;;
@@ -217,9 +217,14 @@ maybe_install_sidecar() {
     spark-operator|zookeeper-operator|opa-operator)
       sidecar_install_monitoring_operator
     ;;
-    kafka-operator|nifi-operator)
+    kafka-operator|nifi-operator|hive-operator|hdfs-operator)
       sidecar_install_monitoring_operator
       sidecar_install_zookeeper_operator
+    ;;
+    hbase-operator)
+      sidecar_install_monitoring_operator
+      sidecar_install_zookeeper_operator
+      # TODO: hdfs operator
     ;;
     trino-operator)
       sidecar_install_monitoring_operator

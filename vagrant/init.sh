@@ -35,7 +35,7 @@ check_args() {
   esac
 
   case ${COMPONENT} in
-  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator)
+  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator|hdfs-operator|hive-operator|hbase-operator)
     ;;
    *)
     usage
@@ -53,7 +53,7 @@ Usage:
 Arguments:
 
     container-os-name: debian10, debian11, centos7, centos8
-    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator, nifi-operator, hdfs-operator, hbase-operator, trino-operator
+    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator, nifi-operator, hdfs-operator, hbase-operator, trino-operator, hive-operator, hdfs-operator, hbase-operator
     nodes:             Optional. Number of agent VMs to start. Default: 1
 USAGE
 }
