@@ -1,10 +1,11 @@
 #!/bin/bash
 
 
-OPERATOR_NAME=${1:-zookeeper-operator}
+CONTAINER_OS_NAME=$1
+OPERATOR_NAME=${2:-zookeeper-operator}
 OPERATOR_PACKAGE_NAME="stackable-${OPERATOR_NAME}"
 
-export KUBECONFIG=/rancher/k3s.yml
+export KUBECONFIG=/rancher/k3s-${CONTAINER_OS_NAME}.yml
 
 set -e
 
@@ -44,7 +45,7 @@ install_service_environment() {
 
   tee /etc/systemd/system/${OPERATOR_PACKAGE_NAME}.service.d/override.conf > /dev/null <<EOF
 [Service]
-Environment="KUBECONFIG=/rancher/k3s.yml"
+Environment="KUBECONFIG=${KUBECONFIG}"
 EOF
 }
 

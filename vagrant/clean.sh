@@ -1,16 +1,29 @@
 #!/usr/bin/env sh
 
-COMMAND=${1:-halt}
-VM_NAME=${2}
+CONTAINER_OS_NAME=${1}
+COMMAND=${2:-halt}
+VM_NAME=${3}
+
+help() {
+  echo "Usage: clean.sh <debian10|debian11|centos7|ceontos8> [halt|destroy|suspend] [<vm-name>]"
+}
+
+if test -z "${CONTAINER_OS_NAME}"; then
+  help
+  exit 1
+fi
 
 case ${COMMAND} in
   halt)
-    vagrant halt ${VM_NAME}
+    CONTAINER_OS_NAME=${CONTAINER_OS_NAME} vagrant halt ${VM_NAME}
   ;;
   destroy)
-    vagrant destroy -f -g ${VM_NAME}
+    CONTAINER_OS_NAME=${CONTAINER_OS_NAME} vagrant destroy -f -g ${VM_NAME}
   ;;
   suspend)
-    vagrant suspend ${VM_NAME}
+    CONTAINER_OS_NAME=${CONTAINER_OS_NAME} vagrant suspend ${VM_NAME}
+  ;;
+  *)
+    help
   ;;
 esac

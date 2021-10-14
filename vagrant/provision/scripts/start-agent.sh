@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set +x
 
-NODE_NAME=$1
-NODE_ID=$2
+CONTAINER_OS_NAME=$1
+NODE_NAME=$2
+NODE_ID=$3
 
-export KUBECONFIG=/rancher/k3s.yml
+export KUBECONFIG=/rancher/k3s-${CONTAINER_OS_NAME}.yml
 
 wait_for_k3s() {
   until kubectl get crds >/dev/null 2>&1; do

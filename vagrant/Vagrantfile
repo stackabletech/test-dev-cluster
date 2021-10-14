@@ -6,7 +6,7 @@
 # This contains variable definitions such as OPERATOR_SRC_DIR, OPERATOR_TESTS_SRC_DIR and so on,
 # that cannot be easily defined in this file.
 #
-require_relative './conf'
+require_relative "./conf/#{ENV['CONTAINER_OS_NAME']}"
 
 Vagrant.configure("2") do |config|
 
@@ -14,9 +14,10 @@ Vagrant.configure("2") do |config|
   ### k3s
   ###
   config.vm.define "k3s-#{CONTAINER_OS_NAME}" do |vm|
+    ip = "192.168.33.#{10*(1+SUPPORTED_OS.index(CONTAINER_OS_NAME))}"
     vm.vm.box = AGENT_BASE_BOX
     vm.vm.hostname = "k3s-#{CONTAINER_OS_NAME}"
-    vm.vm.network :private_network, ip: "192.168.33.10"
+    vm.vm.network :private_network, ip: ip
     vm.vm.provision :hosts, :sync_hosts => true
 
     vm.vm.provider "virtualbox" do |vb|
@@ -33,15 +34,15 @@ Vagrant.configure("2") do |config|
 
     vm.vm.synced_folder "rancher", "/rancher", SharedFoldersEnableSymlinksCreate: false
 
-    vm.vm.provision "shell", path: "provision/scripts/k3s.sh"
+    vm.vm.provision "shell", path: "provision/scripts/k3s.sh", args: [CONTAINER_OS_NAME, ip]
 
     if COMPONENT == "agent" then
         vm.vm.synced_folder "provision", "/provision", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
         vm.vm.synced_folder AGENT_SRC_DIR, "/#{COMPONENT}", SharedFoldersEnableSymlinksCreate: false
         vm.vm.synced_folder AGENT_TESTS_SRC_DIR, "/#{COMPONENT}-integration-tests", SharedFoldersEnableSymlinksCreate: false
 
-        vm.vm.provision "shell", path: "provision/scripts/common.sh"
-        vm.vm.provision "shell", path: "provision/scripts/rust.sh"
+        vm.vm.provision "shell", path: "provision/scripts/common.sh", args: [CONTAINER_OS_NAME]
+        vm.vm.provision "shell", path: "provision/scripts/rust.sh", args: []
     end
   end
 
@@ -53,8 +54,8 @@ Vagrant.configure("2") do |config|
     (1..NODE_COUNT).each do |n|
       config.vm.define "node#{n}-#{CONTAINER_OS_NAME}" do |vm|
         vm.vm.box = AGENT_BASE_BOX
-        vm.vm.hostname = "node#{n}-#{CONTAINER_OS_NAME}"
-        vm.vm.network :private_network, ip: "192.168.33.#{20+n}"
+        vm.vm.hostname = "node#{n}-#{CONTAINER_OS_NAME}" 
+        vm.vm.network :private_network, ip: "192.168.33.#{n+10*(1+SUPPORTED_OS.index(CONTAINER_OS_NAME))}"
         vm.vm.provision :hosts, :sync_hosts => true
 
         vm.vm.provider "virtualbox" do |vb|
@@ -66,9 +67,9 @@ Vagrant.configure("2") do |config|
         vm.vm.synced_folder "rancher", "/rancher", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
         vm.vm.synced_folder "provision", "/provision", mount_options: ['ro'], SharedFoldersEnableSymlinksCreate: false
 
-        vm.vm.provision "shell", path: "provision/scripts/common.sh"
-        vm.vm.provision "shell", path: "provision/scripts/agent.sh"
-        vm.vm.provision "shell", path: "provision/scripts/start-agent.sh", run: 'always', args: [vm.vm.hostname, n]
+        vm.vm.provision "shell", path: "provision/scripts/common.sh", args: [CONTAINER_OS_NAME]
+        vm.vm.provision "shell", path: "provision/scripts/agent.sh", args: [CONTAINER_OS_NAME]
+        vm.vm.provision "shell", path: "provision/scripts/start-agent.sh", args: [CONTAINER_OS_NAME, vm.vm.hostname, n] , run: 'always'
 
         vm.vm.network "forwarded_port", guest: 7077, host: 7077, auto_correct: true
         vm.vm.network "forwarded_port", guest: 8001, host: 8001, auto_correct: true
@@ -87,6 +88,7 @@ Vagrant.configure("2") do |config|
     config.vm.define "operator-#{CONTAINER_OS_NAME}" do |vm|
       vm.vm.hostname = "operator-#{CONTAINER_OS_NAME}"
       vm.vm.box = OPERATOR_BASE_BOX
+      vm.vm.network :private_network, ip: "192.168.33.#{9+10*(1+SUPPORTED_OS.index(CONTAINER_OS_NAME))}"
 
       vm.vm.provider "virtualbox" do |vb|
         vb.name = "operator-#{CONTAINER_OS_NAME}"
@@ -99,20 +101,20 @@ Vagrant.configure("2") do |config|
       vm.vm.synced_folder OPERATOR_SRC_DIR, "/#{COMPONENT}", SharedFoldersEnableSymlinksCreate: false
       vm.vm.synced_folder OPERATOR_TESTS_SRC_DIR, "/#{COMPONENT}-integration-tests", SharedFoldersEnableSymlinksCreate: false
 
-      vm.vm.provision "shell", path: "provision/scripts/common.sh"
+      vm.vm.provision "shell", path: "provision/scripts/common.sh", args: [CONTAINER_OS_NAME]
       vm.vm.provision "shell", path: "provision/scripts/rust.sh"
 
       #
       # Install ZK for tools that require it.
       #
       if COMPONENT == "kafka-operator" || COMPONENT == "nifi-operator" then
-        vm.vm.provision "shell", path: "provision/scripts/operator.sh", args: ["zookeeper-operator"]
+        vm.vm.provision "shell", path: "provision/scripts/operator.sh", args: [CONTAINER_OS_NAME, "zookeeper-operator"]
       end
       #
       # Install trino requirements
       #
       if COMPONENT == "trino-operator" then
-        vm.vm.provision "shell", path: "provision/scripts/operator.sh", args: ["monitoring-operator"]
+        vm.vm.provision "shell", path: "provision/scripts/operator.sh", args: [CONTAINER_OS_NAME, "monitoring-operator"]
         vm.vm.provision "shell", path: "provision/scripts/install-trino-cli.sh"
       end
      end

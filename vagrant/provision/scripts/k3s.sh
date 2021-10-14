@@ -1,26 +1,14 @@
 #!/usr/bin/env bash
 
-apt-get update \
- && apt-get install -y \
-    apt-utils \
-    curl \
-    systemd \
-    systemd-sysv \
-    linux-headers-$(uname -r) \
-    build-essential \
-    dkms
+CONTAINER_OS_NAME=$1
+IP=$2
 
-apt-get clean \
-&& rm -rf                     \
-    /var/lib/apt/lists/*          \
-    /var/log/alternatives.log     \
-    /var/log/apt/history.log      \
-    /var/log/apt/term.log         \
-    /var/log/dpkg.log
+#  --bind-address 192.168.33.10 \
+#  --node-external-ip 192.168.33.10 \
 
 curl -sfL https://get.k3s.io | sh -s - \
-  --bind-address 192.168.33.10 \
-  --node-external-ip 192.168.33.10 \
+  --bind-address ${IP} \
+  --node-external-ip ${IP} \
   --disable coredns \
   --disable servicelb \
   --disable traefik \
@@ -28,7 +16,7 @@ curl -sfL https://get.k3s.io | sh -s - \
   --disable metrics-server \
   --disable-cloud-controller \
   --disable-network-policy \
-  --write-kubeconfig /rancher/k3s.yml \
+  --write-kubeconfig /rancher/k3s-${CONTAINER_OS_NAME}.yml \
   --kube-controller-manager-arg cluster-signing-cert-file= \
   --kube-controller-manager-arg cluster-signing-key-file= \
   --kube-controller-manager-arg cluster-signing-kube-apiserver-client-cert-file=/var/lib/rancher/k3s/server/tls/client-ca.crt \

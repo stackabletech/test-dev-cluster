@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-set -ex
+#set -ex
+CONTAINER_OS_NAME=$1
 
 
 [ -d /var/log/stackable/servicelogs ] || mkdir -p /var/log/stackable/servicelogs
@@ -39,7 +40,7 @@ install_service_environment() {
 
   tee /etc/systemd/system/stackable-agent.service.d/override.conf > /dev/null <<EOF
 [Service]
-Environment="KUBECONFIG=/rancher/k3s.yml"
+Environment="KUBECONFIG=/rancher/k3s-${CONTAINER_OS_NAME}.yml"
 EOF
 }
 

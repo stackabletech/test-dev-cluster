@@ -60,7 +60,7 @@ USAGE
 
 write_conf_file() {
 
-  local ENV_FILE=conf.rb
+  local ENV_FILE="conf/${CONTAINER_OS_NAME}.rb"
 
   local STACKABLE_SCRIPTS_DIR=${PARENT_DIR}/test-dev-cluster/stackable-scripts
   local AGENT_SRC_DIR=dummy
@@ -87,7 +87,9 @@ write_conf_file() {
     ;;
   esac
 
-    tee ${ENV_FILE}  > /dev/null <<EOF
+  [ -d $(dirname  ENV_FILE) ] || mkdir -p $(dirname  ENV_FILE)
+
+  tee ${ENV_FILE}  > /dev/null <<EOF
 CONTAINER_OS_NAME="${CONTAINER_OS_NAME}"
 STACKABLE_SCRIPTS_DIR="${STACKABLE_SCRIPTS_DIR}"
 AGENT_SRC_DIR="${AGENT_SRC_DIR}"
@@ -99,12 +101,13 @@ K3S_BASE_BOX="generic/debian10"
 AGENT_BASE_BOX="generic/${CONTAINER_OS_NAME}"
 OPERATOR_BASE_BOX="generic/${CONTAINER_OS_NAME}"
 NODE_COUNT=${VM_NODE_COUNT}
+SUPPORTED_OS=["debian10","debian11","centos7","centos8"]
 EOF
 
  }
 
 vagrant_up() {
-  vagrant up --provider=virtualbox
+  CONTAINER_OS_NAME=${CONTAINER_OS_NAME} vagrant up --provider=virtualbox
 }
 
 #--------------------
@@ -114,5 +117,6 @@ vagrant_up() {
   check_args
   write_conf_file
   vagrant_up
+  export CONTAINER_OS_NAME=${CONTAINER_OS_NAME} 
 }
 

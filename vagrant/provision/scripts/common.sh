@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
+CONTAINER_OS_NAME=$1
+
 install_debian_packages() {
   #------------------------------------------------------------------------------
   # Install prerequisites
   #------------------------------------------------------------------------------
   apt-get update \
   && apt-get install -y \
-  apt-utils procps curl build-essential pkg-config liblzma-dev libssl-dev libsystemd-dev \
-  systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre python3
+  apt-utils procps curl dkms build-essential linux-headers-$(uname -r) pkg-config \
+    liblzma-dev libssl-dev libsystemd-dev systemd systemd-sysv apt-transport-https \
+    ca-certificates vim openjdk-11-jre python3
+    
 
   #------------------------------------------------------------------------------
   # Make python3 the default python
@@ -37,7 +41,7 @@ install_debian_packages() {
   addgroup stackable \
     && adduser --system --disabled-password --ingroup stackable stackable
 
-  echo "export KUBECONFIG=/rancher/k3s.yml" >> /etc/bash.bashrc
+  echo "export KUBECONFIG=/rancher/k3s-${CONTAINER_OS_NAME}.yml" >> /etc/bash.bashrc
 }
 
 install_centos_packages() {

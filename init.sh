@@ -114,15 +114,11 @@ compose_up() {
     agent)
       SERVICES="${SERVICES} agent"
     ;;
-    zookeeper-operator|spark-operator|opa-operator|hdfs-operator|hbase-operator|trino-operator)
+    zookeeper-operator|spark-operator|opa-operator|hdfs-operator|hbase-operator|trino-operator|kafka-operator|nifi-operator|hive-operator|hdfs-operator|hbase-operator|regorule-operator)
       SERVICES="${SERVICES} agent operator sidecar"
     ;;
     monitoring-operator)
       SERVICES="${SERVICES} agent operator"
-    ;;
-    kafka-operator|nifi-operator|hive-operator|hdfs-operator|hbase-operator)
-      SERVICES="${SERVICES} agent operator sidecar"
-      COMPOSE_ARGS="${COMPOSE_ARGS} --scale sidecar=2" ### one for monitoring and one for zookeeper
     ;;
   esac
   docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_ARGS} ${SERVICES}
@@ -185,50 +181,44 @@ install_trino_client() {
     info done.
 }
 
-sidecar_install_monitoring_operator() {
-    info Start monitoring operator install...
-    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
-    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-monitoring-operator
-    info Finish monitoring operator install.
+sidecar_install_operator() {
+    local OPERATOR=$1
 
-    # Create CRD and simple monitoring cluster
-    info Start monitoring operator requirements install ...
-    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/monitoring-operator/crd
-    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/monitoring-cluster.yaml
-    info Finish monitoring operator requirements install.
-}
+    info Start $OPERATOR operator install...
+    local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-$OPERATOR-operator
+    info Finish $OPERATOR operator install.
 
-sidecar_install_zookeeper_operator() {
-    info Start zookeeper operator install...
-    local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
-    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator
-    info Finish zookeeper operator install.
-
-    # Create CRD and simple zookeeper cluster
-    info Start zookeeper operator requirements install ...
-    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /etc/stackable/zookeeper-operator/crd
-    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /stackable-scripts/cr/zookeeper-cluster.yaml
-    info Finish zookeeper operator requirements install.
+    # Create CRD and simple cluster
+    info Start $OPERATOR operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /etc/stackable/$OPERATOR-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_ZK} kubectl apply -f /stackable-scripts/cr/$OPERATOR-cluster.yaml
+    info Finish $OPERATOR operator requirements install.
 }
 
 maybe_install_sidecar() {
   ### Install the monitoring operator in the first sidecar container
   case ${COMPONENT} in
-    spark-operator|zookeeper-operator|opa-operator)
-      sidecar_install_monitoring_operator
+    spark-operator|zookeeper-operator|hive-operator|opa-operator)
+      sidecar_install_operator monitoring
     ;;
-    kafka-operator|nifi-operator|hive-operator|hdfs-operator)
-      sidecar_install_monitoring_operator
-      sidecar_install_zookeeper_operator
+    kafka-operator|nifi-operator|hdfs-operator)
+      sidecar_install_operator monitoring
+      sidecar_install_operator zookeeper
+      sidecar_install_operator regorule
+      sidecar_install_operator opa
     ;;
     hbase-operator)
-      sidecar_install_monitoring_operator
-      sidecar_install_zookeeper_operator
+      sidecar_install_operator monitoring
+      sidecar_install_operator zookeeper
       # TODO: hdfs operator
     ;;
     trino-operator)
-      sidecar_install_monitoring_operator
       install_trino_client
+      sidecar_install_operator monitoring
+      sidecar_install_operator regorule
+      sidecar_install_operator opa
+      # TODO: hive
     ;;
   esac
 }

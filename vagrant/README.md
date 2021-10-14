@@ -22,14 +22,20 @@
     cd /kafka-operator-integration-tests && cargo test --target-dir /build/tests -- --nocapture --test-threads=1 
 
     # stop the cluster
-    ./clean.sh
+    ./clean.sh debian10
 
     # destroy the cluster
-    ./clean.sh destroy
+    ./clean.sh debian10 destroy
 
     # suspend cluster
-    ./clean.sh suspend
+    ./clean.sh debian10 suspend
 
+
+## Running multiple clusters
+
+It's possible to run multiple clusters, each with it's own OS. Before calling vagrant commands, the environment variable `CONTAINER_OS_NAME` needs to be set acordingly (ex: `debian10` or `centos7`).
+
+The `init.sh` script exports this variable for convenience, but you have to change it manually if want to switch clusters afterwards.
 
 ## agent VM
 
@@ -54,7 +60,7 @@
 
 * agent source is mounted under /agent
 * agent tests source is also mounted under /agent-integration-tests
-* `kubectl` is confgured to use KUBECONFIG=/rancher/k3s.yml
+* `kubectl` is confgured to use KUBECONFIG=/rancher/k3s-debian10.yml
 
 ## operator VM
 
@@ -65,7 +71,7 @@
     sudo su -
 * operator source is mounted under /xxx-operator
 * operator tests source is also mounted under /xxx-operator-integration-tests
-* `kubectl` is confgured to use KUBECONFIG=/rancher/k3s.yml
+* `kubectl` is confgured to use KUBECONFIG=/rancher/k3s-debian10.yml
 
 ## k3s VM
 
