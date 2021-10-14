@@ -13,7 +13,8 @@ RUN yum -y update \
 #------------------------------------------------------------------------------
 # Make python3 the default python
 #------------------------------------------------------------------------------
-RUN alternatives --set python /usr/bin/python3.9
+RUN alternatives --set python /usr/bin/python3.9 \
+  && alternatives --set python3 /usr/bin/python3.9
 
 #------------------------------------------------------------------------------
 # Install k9s

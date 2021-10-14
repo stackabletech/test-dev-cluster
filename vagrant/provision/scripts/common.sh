@@ -57,6 +57,7 @@ install_centos_packages() {
   # Make python3 the default python
   #------------------------------------------------------------------------------
   alternatives --set python /usr/bin/python3.9
+  alternatives --set python3 /usr/bin/python3.9
 
   #------------------------------------------------------------------------------
   # Stackable user
