@@ -11,7 +11,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y \
  apt-utils procps curl build-essential pkg-config liblzma-dev libssl-dev libsystemd-dev \
- systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre
+ systemd systemd-sysv apt-transport-https ca-certificates vim openjdk-11-jre python3
+
+#------------------------------------------------------------------------------
+# Make python3 the default python
+#------------------------------------------------------------------------------
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+
+#------------------------------------------------------------------------------
+# Install k9s
+#------------------------------------------------------------------------------
+RUN curl -L https://github.com/derailed/k9s/releases/download/v0.24.15/k9s_Linux_x86_64.tar.gz | tar -xzC /usr/local/bin
 
 #------------------------------------------------------------------------------
 # Add K8S repository for kubectl

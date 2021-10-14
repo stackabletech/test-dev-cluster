@@ -8,8 +8,20 @@ COPY centos/kubernetes.repo  /etc/yum.repos.d/kubernetes.repo
 #------------------------------------------------------------------------------
 RUN yum -y update \
     && yum install -y yum-utils curl gcc make pkg-config openssl-devel systemd-devel \
-    kubectl vim java-11-openjdk python3 rpm-build jq
+    kubectl vim java-11-openjdk python3 rpm-build jq python39
  
+#------------------------------------------------------------------------------
+# Make python3 the default python
+#------------------------------------------------------------------------------
+RUN alternatives --set python /usr/bin/python3.9 \
+  && alternatives --set python3 /usr/bin/python3.9
+
+#------------------------------------------------------------------------------
+# Install k9s
+#------------------------------------------------------------------------------
+RUN curl -L https://github.com/derailed/k9s/releases/download/v0.24.15/k9s_Linux_x86_64.tar.gz | tar -xzC /usr/local/bin
+
+
 #------------------------------------------------------------------------------
 # Configure systemd.
 #------------------------------------------------------------------------------
