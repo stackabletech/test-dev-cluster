@@ -198,6 +198,46 @@ sidecar_install_monitoring_operator() {
     info Finish monitoring operator requirements install.
 }
 
+sidecar_install_hive_operator() {
+    info Start hive operator install...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-hive-operator
+    info Finish hive operator install.
+
+    # Create CRD and simple hive cluster
+    info Start hive operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/hive-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/hive-cluster.yaml
+    info Finish hive operator requirements install.
+
+}
+
+sidecar_install_opa_operator() {
+    info Start opa operator install...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-opa-operator
+    info Finish opa operator install.
+
+    # Create CRD and simple opa cluster
+    info Start opa operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/opa-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/opa-cluster.yaml
+    info Finish opa operator requirements install.
+}
+
+sidecar_install_regorule_operator() {
+    info Start regorule operator install...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-regorule-operator
+    info Finish regorule operator install.
+
+    # Create CRD and simple regorule cluster
+    info Start regorule operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/regorule-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/regorule-cluster.yaml
+    info Finish regorule operator requirements install.
+}
+
 sidecar_install_zookeeper_operator() {
     info Start zookeeper operator install...
     local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
@@ -228,6 +268,9 @@ maybe_install_sidecar() {
     ;;
     trino-operator)
       sidecar_install_monitoring_operator
+      sidecar_install_regorule_operator
+      sidecar_install_opa_operator
+      #TODO: sidecar_install_hive_operator
       install_trino_client
     ;;
   esac
