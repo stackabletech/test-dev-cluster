@@ -10,7 +10,15 @@ spec:
 
     can_access_catalog = true
 
+    can_create_schema = true
+
+    can_drop_schema = true
+
     can_access_schema = true
+
+    can_create_table = true
+
+    can_drop_table = true
 
     can_access_table = true
 
@@ -20,12 +28,18 @@ spec:
 
     can_show_tables = true
 
-    default can_select_from_columns = true
+    default can_select_from_columns = false
 
     can_select_from_columns {
       input.request.table.catalog == "system"
       input.request.table.schema == "information_schema"
       input.request.table.table == {"tables", "schemata"}[_]
+    }
+
+    can_select_from_columns {
+      input.request.table.catalog == "hive"
+      input.request.table.schema == "iris"
+      input.request.table.table == {"iris_parquet"}[_]
     }
 
     can_view_query_owned_by = true
