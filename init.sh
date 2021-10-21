@@ -254,10 +254,10 @@ sidecar_install_zookeeper_operator() {
 maybe_install_sidecar() {
   ### Install the monitoring operator in the first sidecar container
   case ${COMPONENT} in
-    spark-operator|zookeeper-operator|opa-operator)
+    spark-operator|zookeeper-operator|opa-operator|hive-operator)
       sidecar_install_monitoring_operator
     ;;
-    kafka-operator|nifi-operator|hive-operator|hdfs-operator)
+    kafka-operator|nifi-operator|hdfs-operator)
       sidecar_install_monitoring_operator
       sidecar_install_zookeeper_operator
     ;;
@@ -270,7 +270,7 @@ maybe_install_sidecar() {
       sidecar_install_monitoring_operator
       sidecar_install_regorule_operator
       sidecar_install_opa_operator
-      #TODO: sidecar_install_hive_operator
+      sidecar_install_hive_operator
       install_trino_client
     ;;
   esac
@@ -282,14 +282,21 @@ maybe_install_component_reqs() {
     sleep 5
   done
 
-  info Start ${COMPONENT} requirements install...
+  info Start ${COMPONENT} CRDs ...
   if [ "${COMPONENT}" = "agent" ]; then
     local AGENT_CONTAINER_NAME=$(docker ps --filter name=agent --format '{{.Names}}' | head -1)
     docker exec -t ${AGENT_CONTAINER_NAME} kubectl apply -f /${COMPONENT}/deploy/crd
   else
     docker exec -t operator kubectl apply -f /${COMPONENT}/deploy/crd
   fi
-  info Finish ${COMPONENT} requirements install.
+  info Finish ${COMPONENT} CRD installation.
+
+  if [ "${COMPONENT}" = "hive-operator" ]; then
+    info Install python libs
+      docker exec -t operator pip3 install -r /integration-tests/${COMPONENT}/python/requirements.txt
+    info Finish python lib installation
+  fi
+
 }
 
 #--------------------
