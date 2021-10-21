@@ -78,7 +78,7 @@ write_env_file() {
   *-operator)
   #spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator|hive-operator|hdfs-operator|hbase-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
-    OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
+    OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/integration-tests
     if test ! -d ${OPERATOR_SRC_DIR}; then
       >&2 echo "Folder not found: ${OPERATOR_SRC_DIR}"
       exit 1

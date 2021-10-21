@@ -51,7 +51,7 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - ${OPERATOR_SRC_DIR}:/${COMPONENT}
-      - ${OPERATOR_TESTS_SRC_DIR}:/${COMPONENT}-integration-tests
+      - ${OPERATOR_TESTS_SRC_DIR}:/integration-tests
       - ${STACKABLE_SCRIPTS_DIR}:/stackable-scripts:ro
       - kubeconfig:/etc/rancher/k3s:ro
     depends_on:
