@@ -114,15 +114,11 @@ compose_up() {
     agent)
       SERVICES="${SERVICES} agent"
     ;;
-    zookeeper-operator|spark-operator|opa-operator|hdfs-operator|hbase-operator|trino-operator)
-      SERVICES="${SERVICES} agent operator sidecar"
-    ;;
     monitoring-operator)
       SERVICES="${SERVICES} agent operator"
     ;;
-    kafka-operator|nifi-operator|hive-operator|hdfs-operator|hbase-operator)
+    *)
       SERVICES="${SERVICES} agent operator sidecar"
-      COMPOSE_ARGS="${COMPOSE_ARGS} --scale sidecar=2" ### one for monitoring and one for zookeeper
     ;;
   esac
   docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_ARGS} ${SERVICES}
@@ -240,7 +236,7 @@ sidecar_install_regorule_operator() {
 
 sidecar_install_zookeeper_operator() {
     info Start zookeeper operator install...
-    local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
+    local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
     docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator
     info Finish zookeeper operator install.
 
