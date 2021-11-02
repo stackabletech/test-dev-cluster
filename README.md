@@ -84,7 +84,7 @@ Supported operator integration tests:
 
 In the future `nifi`, `hdfs`, etc. will be added to the list.
 
-This assumes that you have `xxx-operator` and `xxx-oprerator-integration-tests` repositories checked out on your developmnent system. If the `xxx-operator` is missing the `init.sh` will abort before launching docker-compose. If the repository for integration tests is missing, an empty folder with the same name is created.
+This assumes that you have `xxx-operator` and the `integration-tests` repositories checked out on your developmnent system. If the `xxx-operator` is missing the `init.sh` will abort before launching docker-compose. If the repository for integration tests is missing, an empty folder with the same name is created.
 
 ## Notes on the Kafka operator
 

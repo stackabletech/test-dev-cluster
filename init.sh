@@ -78,7 +78,7 @@ write_env_file() {
   *-operator)
   #spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator|hive-operator|hdfs-operator|hbase-operator)
     OPERATOR_SRC_DIR=${PARENT_DIR}/${COMPONENT}
-    OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/${COMPONENT}-integration-tests
+    OPERATOR_TESTS_SRC_DIR=${PARENT_DIR}/integration-tests
     if test ! -d ${OPERATOR_SRC_DIR}; then
       >&2 echo "Folder not found: ${OPERATOR_SRC_DIR}"
       exit 1
@@ -114,15 +114,11 @@ compose_up() {
     agent)
       SERVICES="${SERVICES} agent"
     ;;
-    zookeeper-operator|spark-operator|opa-operator|hdfs-operator|hbase-operator|trino-operator)
-      SERVICES="${SERVICES} agent operator sidecar"
-    ;;
     monitoring-operator)
       SERVICES="${SERVICES} agent operator"
     ;;
-    kafka-operator|nifi-operator|hive-operator|hdfs-operator|hbase-operator)
+    *)
       SERVICES="${SERVICES} agent operator sidecar"
-      COMPOSE_ARGS="${COMPOSE_ARGS} --scale sidecar=2" ### one for monitoring and one for zookeeper
     ;;
   esac
   docker-compose -f ${COMPOSE_DIR}/docker-compose.yml --env-file=.env up --detach --remove-orphans ${COMPOSE_ARGS} ${SERVICES}
@@ -198,9 +194,49 @@ sidecar_install_monitoring_operator() {
     info Finish monitoring operator requirements install.
 }
 
+sidecar_install_hive_operator() {
+    info Start hive operator install...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-hive-operator
+    info Finish hive operator install.
+
+    # Create CRD and simple hive cluster
+    info Start hive operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/hive-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/hive-cluster.yaml
+    info Finish hive operator requirements install.
+
+}
+
+sidecar_install_opa_operator() {
+    info Start opa operator install...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-opa-operator
+    info Finish opa operator install.
+
+    # Create CRD and simple opa cluster
+    info Start opa operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/opa-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/opa-cluster.yaml
+    info Finish opa operator requirements install.
+}
+
+sidecar_install_regorule_operator() {
+    info Start regorule operator install...
+    local SIDECAR_CONTAINER_NAME_MONITOR=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR}  /stackable-scripts/install-operator.sh stackable-regorule-operator
+    info Finish regorule operator install.
+
+    # Create CRD and simple regorule cluster
+    info Start regorule operator requirements install ...
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /etc/stackable/regorule-operator/crd
+    docker exec -t ${SIDECAR_CONTAINER_NAME_MONITOR} kubectl apply -f /stackable-scripts/cr/regorule-cluster.yaml
+    info Finish regorule operator requirements install.
+}
+
 sidecar_install_zookeeper_operator() {
     info Start zookeeper operator install...
-    local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_2 --format '{{.Names}}')
+    local SIDECAR_CONTAINER_NAME_ZK=$(docker ps -q --filter name=sidecar_1 --format '{{.Names}}')
     docker exec -t ${SIDECAR_CONTAINER_NAME_ZK}  /stackable-scripts/install-operator.sh stackable-zookeeper-operator
     info Finish zookeeper operator install.
 
@@ -214,10 +250,10 @@ sidecar_install_zookeeper_operator() {
 maybe_install_sidecar() {
   ### Install the monitoring operator in the first sidecar container
   case ${COMPONENT} in
-    spark-operator|zookeeper-operator|opa-operator)
+    spark-operator|zookeeper-operator|opa-operator|hive-operator)
       sidecar_install_monitoring_operator
     ;;
-    kafka-operator|nifi-operator|hive-operator|hdfs-operator)
+    kafka-operator|nifi-operator|hdfs-operator)
       sidecar_install_monitoring_operator
       sidecar_install_zookeeper_operator
     ;;
@@ -228,6 +264,9 @@ maybe_install_sidecar() {
     ;;
     trino-operator)
       sidecar_install_monitoring_operator
+      sidecar_install_regorule_operator
+      sidecar_install_opa_operator
+      sidecar_install_hive_operator
       install_trino_client
     ;;
   esac
@@ -239,14 +278,21 @@ maybe_install_component_reqs() {
     sleep 5
   done
 
-  info Start ${COMPONENT} requirements install...
+  info Start ${COMPONENT} CRDs ...
   if [ "${COMPONENT}" = "agent" ]; then
     local AGENT_CONTAINER_NAME=$(docker ps --filter name=agent --format '{{.Names}}' | head -1)
     docker exec -t ${AGENT_CONTAINER_NAME} kubectl apply -f /${COMPONENT}/deploy/crd
   else
     docker exec -t operator kubectl apply -f /${COMPONENT}/deploy/crd
   fi
-  info Finish ${COMPONENT} requirements install.
+  info Finish ${COMPONENT} CRD installation.
+
+  if [ "${COMPONENT}" = "hive-operator" ]; then
+    info Install python libs
+      docker exec -t operator pip3 install -r /integration-tests/${COMPONENT}/python/requirements.txt
+    info Finish python lib installation
+  fi
+
 }
 
 #--------------------

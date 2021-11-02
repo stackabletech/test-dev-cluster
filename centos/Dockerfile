@@ -1,5 +1,6 @@
-ARG OS_VERSION
+ARG OS_VERSION=7
 FROM centos:$OS_VERSION
+ARG OS_VERSION # without this, the arg is not available after a FROM statement. See: https://stackoverflow.com/a/56748289
 
 COPY centos/kubernetes.repo  /etc/yum.repos.d/kubernetes.repo
 
@@ -8,13 +9,13 @@ COPY centos/kubernetes.repo  /etc/yum.repos.d/kubernetes.repo
 #------------------------------------------------------------------------------
 RUN yum -y update \
     && yum install -y yum-utils curl gcc make pkg-config openssl-devel systemd-devel \
-    kubectl vim java-11-openjdk python3 rpm-build jq python39
+    kubectl vim java-11-openjdk python39 rpm-build jq
  
 #------------------------------------------------------------------------------
 # Make python3 the default python
 #------------------------------------------------------------------------------
-RUN alternatives --set python /usr/bin/python3.9 \
-  && alternatives --set python3 /usr/bin/python3.9
+
+RUN if [ "8" == "$OS_VERSION" ]; then alternatives --set python /usr/bin/python3; fi
 
 #------------------------------------------------------------------------------
 # Install k9s
