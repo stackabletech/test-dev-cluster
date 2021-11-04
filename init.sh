@@ -37,7 +37,7 @@ check_args() {
   esac
 
   case ${COMPONENT} in
-  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator|hive-operator|hdfs-operator|hbase-operator)
+  agent|spark-operator|zookeeper-operator|kafka-operator|monitoring-operator|opa-operator|nifi-operator|hdfs-operator|hbase-operator|trino-operator|hive-operator|hdfs-operator|hbase-operator|druid-operator)
     ;;
    *)
     usage
@@ -55,7 +55,7 @@ Usage:
 Arguments:
 
     container-os-name: debian, centos7, centos8
-    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator, nifi-operator, hdfs-operator, hbase-operator, trino-operator, hive-operator, hdfs-operator, hbase-operator
+    component:         agent, zookeeper-operator, spark-operator, kafka-operator, monitoring-operator, opa-operator, nifi-operator, hdfs-operator, hbase-operator, trino-operator, hive-operator, hdfs-operator, hbase-operator, druid-operator
     compose-arguments: Optional. Example: --scale agent=3
 USAGE
 }
@@ -257,7 +257,7 @@ maybe_install_sidecar() {
       sidecar_install_monitoring_operator
       sidecar_install_zookeeper_operator
     ;;
-    hbase-operator)
+    hbase-operator|druid-operator)
       sidecar_install_monitoring_operator
       sidecar_install_zookeeper_operator
       # TODO: hdfs operator
